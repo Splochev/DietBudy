@@ -67,7 +67,7 @@
                   <ellipse cx="16.5" cy="6" rx="2.5" ry="4"/>
                   <line x1="16.5" y1="10" x2="16.5" y2="22"/>
                 </svg>
-                Foods
+                <span x-text="$store.diet.t('nav_foods')"></span>
               </a>
               <!-- Planner -->
               <a href="./planner.html"
@@ -81,7 +81,7 @@
                   <line x1="3" y1="10" x2="21" y2="10"/>
                   <line x1="8" y1="14" x2="16" y2="14"/>
                 </svg>
-                Planner
+                <span x-text="$store.diet.t('nav_planner')"></span>
               </a>
               <!-- Workouts (cross-app) -->
               <a href="https://splochev.github.io/GymBudy/workout.html"
@@ -95,16 +95,19 @@
                   <rect x="16" y="7" width="3" height="10" rx="1"/>
                   <line x1="8" y1="12" x2="16" y2="12"/>
                 </svg>
-                Workouts
+                <span x-text="$store.diet.t('nav_workouts')"></span>
               </a>
             </nav>
 
             <div style="flex:1"></div>
 
-            <!-- User + logout -->
+            <!-- Lang toggle + User + logout -->
+            <button class="btn btn-ghost btn-sm" style="font-size:0.75rem;padding:4px 10px"
+              @click="$store.diet.setLang($store.diet.lang === 'en' ? 'bg' : 'en')"
+              x-text="$store.diet.lang === 'en' ? 'EN' : 'BG'"></button>
             <div style="display:flex;align-items:center;gap:8px">
               <span style="font-size:0.8rem;color:var(--text3)" x-text="$store.diet.user?.displayName || $store.diet.user?.email?.split('@')[0]"></span>
-              <button class="btn-icon" @click="$store.diet.logout()" title="Sign out">
+              <button class="btn-icon" @click="$store.diet.logout()" :title="$store.diet.t('sign_out')">
                 <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
                   <polyline points="16 17 21 12 16 7"/>
@@ -117,17 +120,9 @@
           <!-- ═ BODY ═══════════════════════════════════════════════ -->
           <div style="display:flex;flex:1;overflow:hidden;position:relative">
 
-            <!-- Mobile overlay -->
-            <div class="sidebar-mobile-overlay"
-              x-show="$store.diet.sidebarOpen"
-              @click="$store.diet.sidebarOpen = false"
-              style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:40">
-            </div>
-
             <!-- ═ SIDEBAR ════════════════════════════════════════ -->
             <aside id="sidebar" :class="{ open: $store.diet.sidebarOpen }"
-              style="background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;width:240px;flex-shrink:0"
-              :style="$store.diet.sidebarOpen ? '' : 'width:0;border:none'">
+              style="background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
 
               <!-- Mobile header -->
               <div class="sidebar-mobile-header" style="display:none;flex-direction:column;flex-shrink:0">
@@ -151,15 +146,15 @@
                 <div style="display:flex;flex-direction:column;padding:8px;border-bottom:1px solid var(--border);gap:2px">
                   <a href="./food-manager.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);font-size:0.875rem;font-weight:600;text-decoration:none">
                     <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
-                    Foods
+                    <span x-text="$store.diet.t('nav_foods')"></span>
                   </a>
                   <a href="./planner.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
                     <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Planner
+                    <span x-text="$store.diet.t('nav_planner')"></span>
                   </a>
                   <a href="https://splochev.github.io/GymBudy/workout.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
                     <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    Workouts
+                    <span x-text="$store.diet.t('nav_workouts')"></span>
                   </a>
                 </div>
               </div>
@@ -167,7 +162,7 @@
               <!-- Meal Plans section -->
               <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                  <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600">Meal Plans</span>
+                  <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600" x-text="$store.diet.t('meal_plans_label')"></span>
                   <a href="./planner.html" class="btn-icon" style="width:24px;height:24px" title="New meal plan">
                     <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                   </a>
@@ -179,29 +174,50 @@
                       <span style="font-size:0.7rem;color:var(--text3)" x-text="plan.targetCalories ? plan.targetCalories + ' kcal' : ''"></span>
                     </a>
                   </template>
-                  <div x-show="!$store.diet.mealPlans.length" style="font-size:0.8rem;color:var(--text3);padding:8px 12px">No plans yet</div>
+                  <div x-show="!$store.diet.mealPlans.length" style="font-size:0.8rem;color:var(--text3);padding:8px 12px" x-text="$store.diet.t('no_plans_sidebar')"></div>
                 </div>
               </div>
 
               <!-- Stats summary -->
               <div style="padding:12px 16px;flex:1">
-                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:8px">Food Database</div>
+                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:8px" x-text="$store.diet.t('food_db_label')"></div>
                 <div style="display:flex;flex-direction:column;gap:6px">
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)">Total foods</span>
+                    <span style="color:var(--text3)" x-text="$store.diet.t('total_foods')"></span>
                     <span style="color:var(--text);font-weight:600" x-text="$store.diet.foods.length"></span>
                   </div>
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)">Avg protein/100g</span>
+                    <span style="color:var(--text3)" x-text="$store.diet.t('avg_protein')"></span>
                     <span style="color:var(--accent);font-weight:600" x-text="$store.diet.avgProtein + 'g'"></span>
                   </div>
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)">Avg calories/100g</span>
+                    <span style="color:var(--text3)" x-text="$store.diet.t('avg_calories')"></span>
                     <span style="color:var(--text2);font-weight:600" x-text="$store.diet.avgCalories + ' kcal'"></span>
                   </div>
                 </div>
               </div>
+
+              <!-- Mobile user footer (pinned to bottom of drawer) -->
+              <div class="sidebar-mobile-header"
+                style="display:none;flex-direction:column;flex-shrink:0;border-top:1px solid var(--border);padding:12px 16px;gap:6px">
+                <span style="font-size:0.78rem;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" x-text="$store.diet.user?.displayName || $store.diet.user?.email?.split('@')[0]"></span>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <button class="btn btn-ghost btn-sm" style="font-size:0.75rem;padding:3px 8px"
+                    @click="$store.diet.setLang($store.diet.lang === 'en' ? 'bg' : 'en')"
+                    x-text="$store.diet.lang === 'en' ? 'EN' : 'BG'"></button>
+                  <button class="btn-icon" @click="$store.diet.logout()" :title="$store.diet.t('sign_out')">
+                    <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </aside>
+
+            <!-- Mobile overlay — closes sidebar when tapped -->
+            <div id="sidebar-overlay" @click="$store.diet.sidebarOpen = false"></div>
 
             <!-- ═ MAIN CONTENT ═══════════════════════════════════ -->
             <main style="flex:1;overflow:auto;padding:20px">
@@ -209,12 +225,12 @@
               <!-- Page header -->
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
                 <div>
-                  <h1 style="font-size:1.25rem;font-weight:700;margin-bottom:2px">Food Database</h1>
-                  <p style="color:var(--text3);font-size:0.85rem">Manage your food items with nutrition info and pricing</p>
+                  <h1 style="font-size:1.25rem;font-weight:700;margin-bottom:2px" x-text="$store.diet.t('food_database_title')"></h1>
+                  <p style="color:var(--text3);font-size:0.85rem" x-text="$store.diet.t('food_database_desc')"></p>
                 </div>
                 <button class="btn btn-primary" @click="$store.diet.openModal('addFood')">
                   <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                  Add Food
+                  <span x-text="$store.diet.t('btn_add_food')"></span>
                 </button>
               </div>
 
@@ -223,7 +239,7 @@
                 <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input x-model="$store.diet.foodSearch" placeholder="Search foods…" style="width:100%;padding-left:34px" />
+                <input x-model="$store.diet.foodSearch" :placeholder="$store.diet.t('search_placeholder')" style="width:100%;padding-left:34px" />
               </div>
 
               <!-- Table -->
@@ -231,14 +247,14 @@
                 <table class="food-table">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th style="text-align:right">Calories<br><span style="font-size:0.6rem;font-weight:400">/100g</span></th>
-                      <th style="text-align:right">Protein<br><span style="font-size:0.6rem;font-weight:400">/100g</span></th>
-                      <th style="text-align:right">Fats<br><span style="font-size:0.6rem;font-weight:400">/100g</span></th>
-                      <th style="text-align:right">Carbs<br><span style="font-size:0.6rem;font-weight:400">/100g</span></th>
-                      <th style="text-align:right">Pkg Wt<br><span style="font-size:0.6rem;font-weight:400">grams</span></th>
-                      <th style="text-align:right">Price</th>
-                      <th style="text-align:right">₽/100g</th>
+                      <th x-text="$store.diet.t('col_name')"></th>
+                      <th style="text-align:right"><span x-text="$store.diet.t('col_calories')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
+                      <th style="text-align:right"><span x-text="$store.diet.t('col_protein')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
+                      <th style="text-align:right"><span x-text="$store.diet.t('col_fats')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
+                      <th style="text-align:right"><span x-text="$store.diet.t('col_carbs')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
+                      <th style="text-align:right"><span x-text="$store.diet.t('col_weight')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_weight_unit')"></span></th>
+                      <th style="text-align:right" x-text="$store.diet.t('col_price')"></th>
+                      <th style="text-align:right" x-text="$store.diet.t('col_price_100g')"></th>
                       <th></th>
                     </tr>
                   </thead>
@@ -284,8 +300,8 @@
                             <line x1="12" y1="19" x2="12" y2="22"/>
                             <line x1="9" y1="22" x2="15" y2="22"/>
                           </svg>
-                          <p style="font-size:1rem;font-weight:600;margin-bottom:6px" x-text="$store.diet.foodSearch ? 'No foods match your search' : 'No foods yet'"></p>
-                          <p style="font-size:0.85rem" x-text="$store.diet.foodSearch ? 'Try a different search term' : 'Click &quot;Add Food&quot; to get started'"></p>
+                          <p style="font-size:1rem;font-weight:600;margin-bottom:6px" x-text="$store.diet.foodSearch ? $store.diet.t('no_foods_match') : $store.diet.t('no_foods_yet')"></p>
+                          <p style="font-size:0.85rem" x-text="$store.diet.foodSearch ? $store.diet.t('no_foods_search_hint') : $store.diet.t('no_foods_hint')"></p>
                         </div>
                       </td>
                     </tr>
@@ -302,55 +318,55 @@
             <div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px" @click.self="$store.diet.closeModal()">
               <div class="modal-box" @click.stop>
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-                  <h2 style="font-size:1rem;font-weight:700" x-text="$store.diet.modal === 'addFood' ? 'Add Food' : 'Edit Food'"></h2>
+                  <h2 style="font-size:1rem;font-weight:700" x-text="$store.diet.modal === 'addFood' ? $store.diet.t('add_food_title') : $store.diet.t('edit_food_title')"></h2>
                   <button class="btn-icon" @click="$store.diet.closeModal()">
                     <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                   </button>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Food Name *</label>
-                  <input x-model="$store.diet.foodForm.name" placeholder="e.g. Chicken Breast 650g" />
+                  <label class="form-label" x-text="$store.diet.t('label_food_name')"></label>
+                  <input x-model="$store.diet.foodForm.name" :placeholder="$store.diet.t('placeholder_food_name')" />
                 </div>
 
                 <div class="form-row form-row-2">
                   <div>
-                    <label class="form-label">Calories per 100g *</label>
+                    <label class="form-label" x-text="$store.diet.t('label_calories_per100')"></label>
                     <input type="number" x-model.number="$store.diet.foodForm.calories" placeholder="0" min="0" />
                   </div>
                   <div>
-                    <label class="form-label">Protein per 100g *</label>
+                    <label class="form-label" x-text="$store.diet.t('label_protein_per100')"></label>
                     <input type="number" x-model.number="$store.diet.foodForm.protein" placeholder="0" min="0" step="0.1" />
                   </div>
                 </div>
 
                 <div class="form-row form-row-2">
                   <div>
-                    <label class="form-label">Fats per 100g</label>
+                    <label class="form-label" x-text="$store.diet.t('label_fats_per100')"></label>
                     <input type="number" x-model.number="$store.diet.foodForm.fats" placeholder="0" min="0" step="0.1" />
                   </div>
                   <div>
-                    <label class="form-label">Carbs per 100g</label>
+                    <label class="form-label" x-text="$store.diet.t('label_carbs_per100')"></label>
                     <input type="number" x-model.number="$store.diet.foodForm.carbs" placeholder="0" min="0" step="0.1" />
                   </div>
                 </div>
 
                 <div class="form-row form-row-2">
                   <div>
-                    <label class="form-label">Package Weight (g)</label>
+                    <label class="form-label" x-text="$store.diet.t('label_pkg_weight')"></label>
                     <input type="number" x-model.number="$store.diet.foodForm.packageWeight" placeholder="e.g. 500" min="0" />
                   </div>
                   <div>
-                    <label class="form-label">Price</label>
+                    <label class="form-label" x-text="$store.diet.t('label_price')"></label>
                     <input type="number" x-model.number="$store.diet.foodForm.price" placeholder="0.00" min="0" step="0.01" />
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Price Type</label>
+                  <label class="form-label" x-text="$store.diet.t('label_price_type')"></label>
                   <select x-model="$store.diet.foodForm.priceType">
-                    <option value="per_package">Per Package</option>
-                    <option value="per_kg">Per Kilogram</option>
+                    <option value="per_package" x-text="$store.diet.t('price_per_package')"></option>
+                    <option value="per_kg" x-text="$store.diet.t('price_per_kg')"></option>
                   </select>
                 </div>
 
@@ -370,10 +386,10 @@
                 <div x-show="$store.diet.formError" class="error-box" x-text="$store.diet.formError"></div>
 
                 <div style="display:flex;gap:10px;justify-content:flex-end">
-                  <button class="btn btn-secondary" @click="$store.diet.closeModal()">Cancel</button>
+                  <button class="btn btn-secondary" @click="$store.diet.closeModal()" x-text="$store.diet.t('cancel')"></button>
                   <button class="btn btn-primary" @click="$store.diet.submitFoodForm()" :disabled="$store.diet.saving">
-                    <span x-show="!$store.diet.saving" x-text="$store.diet.modal === 'addFood' ? 'Add Food' : 'Save Changes'"></span>
-                    <span x-show="$store.diet.saving">Saving…</span>
+                    <span x-show="!$store.diet.saving" x-text="$store.diet.modal === 'addFood' ? $store.diet.t('btn_add_food_submit') : $store.diet.t('btn_save_changes')"></span>
+                    <span x-show="$store.diet.saving" x-text="$store.diet.t('btn_saving')"></span>
                   </button>
                 </div>
               </div>
@@ -384,15 +400,15 @@
           <template x-if="$store.diet.modal === 'deleteFood'">
             <div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px" @click.self="$store.diet.closeModal()">
               <div class="modal-box" style="max-width:380px" @click.stop>
-                <h2 style="font-size:1rem;font-weight:700;margin-bottom:8px">Delete Food</h2>
+                <h2 style="font-size:1rem;font-weight:700;margin-bottom:8px" x-text="$store.diet.t('delete_food_title')"></h2>
                 <p style="color:var(--text3);font-size:0.875rem;margin-bottom:20px">
-                  Delete <strong x-text="$store.diet.selectedFood?.name"></strong>? This cannot be undone.
+                  <span x-text="$store.diet.selectedFood?.name"></span>? <span x-text="$store.diet.t('confirm_delete_food')"></span>
                 </p>
                 <div style="display:flex;gap:10px;justify-content:flex-end">
-                  <button class="btn btn-secondary" @click="$store.diet.closeModal()">Cancel</button>
+                  <button class="btn btn-secondary" @click="$store.diet.closeModal()" x-text="$store.diet.t('cancel')"></button>
                   <button class="btn btn-danger" @click="$store.diet.confirmDeleteFood()" :disabled="$store.diet.saving">
-                    <span x-show="!$store.diet.saving">Delete</span>
-                    <span x-show="$store.diet.saving">Deleting…</span>
+                    <span x-show="!$store.diet.saving" x-text="$store.diet.t('delete')"></span>
+                    <span x-show="$store.diet.saving" x-text="$store.diet.t('deleting')"></span>
                   </button>
                 </div>
               </div>
@@ -416,11 +432,25 @@
       </template>
     </div><!-- /root -->
 
+    <style>
+      #sidebar { flex-shrink:0; width:0; overflow:hidden; transition: width 0.25s ease; }
+      #sidebar.open { width: 280px; }
+      @media (max-width: 700px) {
+        #topbar > *:nth-child(n + 3) { display: none !important; }
+        #sidebar { position:fixed; top:0; left:0; height:100vh; z-index:200; box-shadow:none; transition: width 0.25s ease, box-shadow 0.25s ease; }
+        #sidebar.open { width: min(300px, 85vw); box-shadow: 4px 0 32px rgba(0,0,0,0.6); }
+        #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:199; }
+        #sidebar.open ~ #sidebar-overlay, body:has(#sidebar.open) #sidebar-overlay { display:block; }
+        .sidebar-mobile-header { display: flex !important; }
+      }
+      @media (min-width: 701px) { .sidebar-mobile-header { display: none !important; } }
+    </style>
     <script type="module">
       import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/module.esm.js";
       import { auth } from "./js/firebase.js";
       import * as DB from "./js/db.js";
       import { pricePer100g, round } from "./js/utils.js";
+      import { translations } from "./js/i18n.js";
       import {
         signOut,
         onAuthStateChanged,
@@ -442,6 +472,11 @@
         saving: false,
         formError: "",
         toasts: [],
+
+        // ── i18n ──────────────────────────────────────────────
+        lang: localStorage.getItem("dietbudy-lang") || "en",
+        t(key) { const tr = translations[this.lang] ?? translations.en; return tr[key] ?? translations.en[key] ?? key; },
+        setLang(code) { this.lang = code; localStorage.setItem("dietbudy-lang", code); },
 
         // ── Food form ─────────────────────────────────────────
         foodForm: {
@@ -549,13 +584,13 @@
             if (this.modal === "addFood") {
               const newFood = await DB.addFood(this.user.uid, this.foodForm);
               this.foods = [...this.foods, newFood].sort((a, b) => a.name.localeCompare(b.name));
-              this.toast("Food added!");
+              this.toast(this.t("toast_food_added"));
             } else {
               await DB.updateFood(this.user.uid, this.editingFoodId, this.foodForm);
               this.foods = this.foods.map(f =>
                 f.id === this.editingFoodId ? { ...f, ...this.foodForm } : f
               );
-              this.toast("Food updated!");
+              this.toast(this.t("toast_food_updated"));
             }
             this.closeModal();
           } catch (e) {
@@ -570,7 +605,7 @@
           try {
             await DB.deleteFood(this.user.uid, this.editingFoodId);
             this.foods = this.foods.filter(f => f.id !== this.editingFoodId);
-            this.toast("Food deleted!");
+            this.toast(this.t("toast_food_deleted"));
             this.closeModal();
           } catch (e) {
             this.formError = e.message;

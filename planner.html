@@ -110,7 +110,7 @@
         <div style="display:flex;flex-direction:column;height:100vh">
 
           <!-- ═ TOP BAR ═══════════════════════════════════════════ -->
-          <header style="display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0">
+          <header id="topbar" style="display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0">
             <button class="btn-icon" @click="$store.planner.sidebarOpen = !$store.planner.sidebarOpen" title="Toggle sidebar">
               <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
             </button>
@@ -140,7 +140,7 @@
                   <ellipse cx="16.5" cy="6" rx="2.5" ry="4"/>
                   <line x1="16.5" y1="10" x2="16.5" y2="22"/>
                 </svg>
-                Foods
+                <span x-text="$store.planner.t('nav_foods')"></span>
               </a>
               <a href="./planner.html"
                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--accent);background:var(--accent-bg);text-decoration:none">
@@ -151,7 +151,7 @@
                   <line x1="3" y1="10" x2="21" y2="10"/>
                   <line x1="8" y1="14" x2="16" y2="14"/>
                 </svg>
-                Planner
+                <span x-text="$store.planner.t('nav_planner')"></span>
               </a>
               <a href="https://splochev.github.io/GymBudy/workout.html"
                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)"
@@ -164,7 +164,7 @@
                   <rect x="16" y="7" width="3" height="10" rx="1"/>
                   <line x1="8" y1="12" x2="16" y2="12"/>
                 </svg>
-                Workouts
+                <span x-text="$store.planner.t('nav_workouts')"></span>
               </a>
             </nav>
 
@@ -174,13 +174,18 @@
             <div x-show="$store.planner.activePlan" style="display:flex;align-items:center;gap:8px">
               <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text3)">
                 <div :class="$store.planner.saving ? 'dot-saving' : 'dot-saved'" class="save-dot"></div>
-                <span x-text="$store.planner.saving ? 'Saving…' : 'Saved'"></span>
+                <span x-text="$store.planner.saving ? $store.planner.t('saving') : $store.planner.t('saved')"></span>
               </div>
             </div>
 
+            <!-- Lang toggle + User + logout -->
+            <button class="btn btn-ghost btn-sm" style="font-size:0.75rem;padding:4px 10px"
+              @click="$store.planner.setLang($store.planner.lang === 'en' ? 'bg' : 'en')"
+              x-text="$store.planner.lang === 'en' ? 'EN' : 'BG'"></button>
+
             <div style="display:flex;align-items:center;gap:8px">
               <span style="font-size:0.8rem;color:var(--text3)" x-text="$store.planner.user?.displayName || $store.planner.user?.email?.split('@')[0]"></span>
-              <button class="btn-icon" @click="$store.planner.logout()" title="Sign out">
+              <button class="btn-icon" @click="$store.planner.logout()" :title="$store.planner.t('sign_out')">
                 <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
                   <polyline points="16 17 21 12 16 7"/>
@@ -193,17 +198,9 @@
           <!-- ═ BODY ════════════════════════════════════════════════ -->
           <div style="display:flex;flex:1;overflow:hidden;position:relative">
 
-            <!-- Mobile overlay -->
-            <div class="sidebar-mobile-overlay"
-              x-show="$store.planner.sidebarOpen"
-              @click="$store.planner.sidebarOpen = false"
-              style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:40">
-            </div>
-
             <!-- ═ SIDEBAR ════════════════════════════════════════ -->
-            <aside :class="{ open: $store.planner.sidebarOpen }"
-              style="background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0"
-              :style="$store.planner.sidebarOpen ? 'width:240px' : 'width:0;border:none'">
+            <aside id="sidebar" :class="{ open: $store.planner.sidebarOpen }"
+              style="background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
 
               <!-- Mobile header -->
               <div class="sidebar-mobile-header" style="display:none;flex-direction:column;flex-shrink:0">
@@ -217,16 +214,25 @@
                   </button>
                 </div>
                 <div style="display:flex;flex-direction:column;padding:8px;border-bottom:1px solid var(--border);gap:2px">
-                  <a href="./food-manager.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;text-decoration:none">Foods</a>
-                  <a href="./planner.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);font-size:0.875rem;font-weight:600;text-decoration:none">Planner</a>
-                  <a href="https://splochev.github.io/GymBudy/workout.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;text-decoration:none">Workouts</a>
+                  <a href="./food-manager.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
+                    <span x-text="$store.planner.t('nav_foods')"></span>
+                  </a>
+                  <a href="./planner.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);font-size:0.875rem;font-weight:600;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+                    <span x-text="$store.planner.t('nav_planner')"></span>
+                  </a>
+                  <a href="https://splochev.github.io/GymBudy/workout.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <span x-text="$store.planner.t('nav_workouts')"></span>
+                  </a>
                 </div>
               </div>
 
               <!-- Meal Plans list -->
               <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                  <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600">Meal Plans</span>
+                  <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600" x-text="$store.planner.t('meal_plans_sidebar')"></span>
                   <button class="btn-icon" style="width:24px;height:24px" title="New plan" @click="$store.planner.newPlan()">
                     <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                   </button>
@@ -247,18 +253,18 @@
                       </div>
                     </div>
                   </template>
-                  <div x-show="!$store.planner.mealPlans.length" style="font-size:0.8rem;color:var(--text3);padding:8px 12px">No plans yet</div>
+                  <div x-show="!$store.planner.mealPlans.length" style="font-size:0.8rem;color:var(--text3);padding:8px 12px" x-text="$store.planner.t('no_plans_sidebar')"></div>
                 </div>
               </div>
 
               <!-- Daily summary (if plan loaded) -->
               <div x-show="$store.planner.activePlan" style="padding:12px 16px;flex:1;overflow-y:auto">
-                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:10px">Daily Summary</div>
+                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:10px" x-text="$store.planner.t('daily_summary')"></div>
                 <div style="display:flex;flex-direction:column;gap:8px">
                   <!-- Calories -->
                   <div>
                     <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px">
-                      <span style="color:var(--text3)">Calories</span>
+                      <span style="color:var(--text3)" x-text="$store.planner.t('calories_label')"></span>
                       <span :class="$store.planner.calorieClass" style="font-weight:600">
                         <span x-text="$store.planner.dailyTotals.calories"></span>
                         <span style="color:var(--text3)" x-show="$store.planner.activePlan?.targetCalories">
@@ -274,7 +280,7 @@
                   <!-- Protein -->
                   <div>
                     <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px">
-                      <span style="color:var(--text3)">Protein</span>
+                      <span style="color:var(--text3)" x-text="$store.planner.t('protein_label')"></span>
                       <span :class="$store.planner.proteinClass" style="font-weight:600">
                         <span x-text="$store.planner.dailyTotals.protein + 'g'"></span>
                         <span style="color:var(--text3)" x-show="$store.planner.activePlan?.targetProtein">
@@ -289,20 +295,41 @@
                   </div>
                   <!-- Cost -->
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)">Daily Cost</span>
+                    <span style="color:var(--text3)" x-text="$store.planner.t('daily_cost')"></span>
                     <span style="font-weight:600;color:var(--text2)" x-text="$store.planner.dailyTotals.cost ? $store.planner.dailyTotals.cost.toFixed(2) + ' lv' : '—'"></span>
                   </div>
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)">Fats</span>
+                    <span style="color:var(--text3)" x-text="$store.planner.t('fats_label')"></span>
                     <span style="color:var(--text2)" x-text="$store.planner.dailyTotals.fats ? $store.planner.dailyTotals.fats + 'g' : '—'"></span>
                   </div>
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)">Carbs</span>
+                    <span style="color:var(--text3)" x-text="$store.planner.t('carbs_label')"></span>
                     <span style="color:var(--text2)" x-text="$store.planner.dailyTotals.carbs ? $store.planner.dailyTotals.carbs + 'g' : '—'"></span>
                   </div>
                 </div>
               </div>
+
+              <!-- Mobile user footer (pinned to bottom of drawer) -->
+              <div class="sidebar-mobile-header"
+                style="display:none;flex-direction:column;flex-shrink:0;border-top:1px solid var(--border);padding:12px 16px;gap:6px">
+                <span style="font-size:0.78rem;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" x-text="$store.planner.user?.displayName || $store.planner.user?.email?.split('@')[0]"></span>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <button class="btn btn-ghost btn-sm" style="font-size:0.75rem;padding:3px 8px"
+                    @click="$store.planner.setLang($store.planner.lang === 'en' ? 'bg' : 'en')"
+                    x-text="$store.planner.lang === 'en' ? 'EN' : 'BG'"></button>
+                  <button class="btn-icon" @click="$store.planner.logout()" :title="$store.planner.t('sign_out')">
+                    <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </aside>
+
+            <!-- Mobile overlay — closes sidebar when tapped -->
+            <div id="sidebar-overlay" @click="$store.planner.sidebarOpen = false"></div>
 
             <!-- ═ MAIN CONTENT ════════════════════════════════════ -->
             <main style="flex:1;overflow:auto">
@@ -316,11 +343,11 @@
                     <line x1="8" y1="2" x2="8" y2="6"/>
                     <line x1="3" y1="10" x2="21" y2="10"/>
                   </svg>
-                  <p style="font-size:1rem;font-weight:600;margin-bottom:6px">No meal plan selected</p>
-                  <p style="font-size:0.85rem;margin-bottom:20px">Create a new plan or select one from the sidebar</p>
+                  <p style="font-size:1rem;font-weight:600;margin-bottom:6px" x-text="$store.planner.t('no_plan_selected')"></p>
+                  <p style="font-size:0.85rem;margin-bottom:20px" x-text="$store.planner.t('no_plan_hint')"></p>
                   <button class="btn btn-primary" @click="$store.planner.newPlan()">
                     <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                    New Meal Plan
+                    <span x-text="$store.planner.t('btn_new_plan')"></span>
                   </button>
                 </div>
               </template>
@@ -333,24 +360,24 @@
                   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
                     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
                       <div style="flex:1;min-width:200px">
-                        <label class="form-label">Plan Name</label>
+                        <label class="form-label" x-text="$store.planner.t('plan_name_label')"></label>
                         <input x-model="$store.planner.activePlan.name" @input="$store.planner.debouncedSave()"
                           style="font-size:1rem;font-weight:600;background:transparent;border:1px solid transparent;padding:4px 8px;width:100%"
-                          placeholder="My Meal Plan" />
+                          :placeholder="$store.planner.t('plan_name_placeholder')" />
                       </div>
                       <div style="display:flex;gap:10px;flex-wrap:wrap">
                         <div style="min-width:110px">
-                          <label class="form-label">Target Calories</label>
+                          <label class="form-label" x-text="$store.planner.t('target_calories_label')"></label>
                           <input type="number" x-model.number="$store.planner.activePlan.targetCalories"
                             @input="$store.planner.debouncedSave()" placeholder="2000" min="0" style="width:100%" />
                         </div>
                         <div style="min-width:110px">
-                          <label class="form-label">Target Protein (g)</label>
+                          <label class="form-label" x-text="$store.planner.t('target_protein_label')"></label>
                           <input type="number" x-model.number="$store.planner.activePlan.targetProtein"
                             @input="$store.planner.debouncedSave()" placeholder="150" min="0" style="width:100%" />
                         </div>
                         <div style="min-width:80px">
-                          <label class="form-label">Days</label>
+                          <label class="form-label" x-text="$store.planner.t('days_label')"></label>
                           <input type="number" x-model.number="$store.planner.activePlan.days"
                             @input="$store.planner.debouncedSave()" placeholder="5" min="1" max="365" style="width:100%" />
                         </div>
@@ -360,15 +387,9 @@
 
                   <!-- Tabs: Meals | Shopping List | Cost Overview -->
                   <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;width:fit-content">
-                    <button class="tab-btn" :class="{ active: $store.planner.tab === 'meals' }" @click="$store.planner.tab = 'meals'">
-                      🍽️ Meals
-                    </button>
-                    <button class="tab-btn" :class="{ active: $store.planner.tab === 'shopping' }" @click="$store.planner.tab = 'shopping'">
-                      🛒 Shopping List
-                    </button>
-                    <button class="tab-btn" :class="{ active: $store.planner.tab === 'costs' }" @click="$store.planner.tab = 'costs'">
-                      💰 Cost Overview
-                    </button>
+                    <button class="tab-btn" :class="{ active: $store.planner.tab === 'meals' }" @click="$store.planner.tab = 'meals'" x-text="'\uD83C\uDF7D\uFE0F ' + $store.planner.t('tab_meals')"></button>
+                    <button class="tab-btn" :class="{ active: $store.planner.tab === 'shopping' }" @click="$store.planner.tab = 'shopping'" x-text="'\uD83D\uDED2 ' + $store.planner.t('tab_shopping')"></button>
+                    <button class="tab-btn" :class="{ active: $store.planner.tab === 'costs' }" @click="$store.planner.tab = 'costs'" x-text="'\uD83D\uDCB0 ' + $store.planner.t('tab_costs')"></button>
                   </div>
 
                   <!-- ── TAB: MEALS ───────────────────────────────── -->
@@ -379,32 +400,32 @@
                         <div class="stat-chip" :class="$store.planner.calorieClass">
                           <span class="stat-val" x-text="$store.planner.dailyTotals.calories"></span>
                           <span class="stat-label">
-                            kcal / day
+                            <span x-text="$store.planner.t('kcal_day')"></span>
                             <template x-if="$store.planner.activePlan.targetCalories">
-                              <span x-text="' (target: ' + $store.planner.activePlan.targetCalories + ')'"></span>
+                              <span x-text="' (' + $store.planner.t('target_label') + ' ' + $store.planner.activePlan.targetCalories + ')'"></span>
                             </template>
                           </span>
                         </div>
                         <div class="stat-chip" :class="$store.planner.proteinClass">
                           <span class="stat-val" x-text="$store.planner.dailyTotals.protein + 'g'"></span>
                           <span class="stat-label">
-                            protein / day
+                            <span x-text="$store.planner.t('protein_day')"></span>
                             <template x-if="$store.planner.activePlan.targetProtein">
-                              <span x-text="' (target: ' + $store.planner.activePlan.targetProtein + 'g)'"></span>
+                              <span x-text="' (' + $store.planner.t('target_label') + ' ' + $store.planner.activePlan.targetProtein + 'g)'"></span>
                             </template>
                           </span>
                         </div>
                         <div class="stat-chip">
                           <span class="stat-val" x-text="$store.planner.dailyTotals.fats + 'g'"></span>
-                          <span class="stat-label">fats / day</span>
+                          <span class="stat-label" x-text="$store.planner.t('fats_day')"></span>
                         </div>
                         <div class="stat-chip">
                           <span class="stat-val" x-text="$store.planner.dailyTotals.carbs + 'g'"></span>
-                          <span class="stat-label">carbs / day</span>
+                          <span class="stat-label" x-text="$store.planner.t('carbs_day')"></span>
                         </div>
                         <div class="stat-chip" x-show="$store.planner.dailyTotals.cost > 0">
                           <span class="stat-val" x-text="$store.planner.dailyTotals.cost.toFixed(2) + ' lv'"></span>
-                          <span class="stat-label">cost / day</span>
+                          <span class="stat-label" x-text="$store.planner.t('cost_day')"></span>
                         </div>
                       </div>
 
@@ -429,14 +450,14 @@
                             </button>
                           </div>
 
-                          <!-- Column header for items -->
+                            <!-- Column header for items -->
                           <div class="meal-item-grid" style="background:var(--surface2);padding-top:6px;padding-bottom:6px">
-                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600">Food</span>
-                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">Qty (g)</span>
-                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">Kcal</span>
-                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);font-weight:600;text-align:center">Protein</span>
-                            <span class="col-fats" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">Fats</span>
-                            <span class="col-cost" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">Cost</span>
+                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600" x-text="$store.planner.t('col_food')"></span>
+                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_qty')"></span>
+                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_kcal')"></span>
+                            <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);font-weight:600;text-align:center" x-text="$store.planner.t('protein_label')"></span>
+                            <span class="col-fats" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('fats_label')"></span>
+                            <span class="col-cost" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_price')"></span>
                             <span></span>
                           </div>
 
@@ -493,7 +514,7 @@
                             <button class="btn btn-ghost btn-sm" style="color:var(--accent)"
                               @click="meal.items.push({ foodId: '', quantity: 100 }); $store.planner.debouncedSave()">
                               <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                              Add Food
+                              <span x-text="$store.planner.t('btn_add_food_meal')"></span>
                             </button>
                           </div>
                         </div>
@@ -502,7 +523,7 @@
                       <!-- Add meal -->
                       <button class="btn btn-secondary" @click="$store.planner.addMeal()">
                         <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                        Add Meal
+                        <span x-text="$store.planner.t('btn_add_meal')"></span>
                       </button>
                     </div>
                   </template>
@@ -512,7 +533,7 @@
                     <div>
                       <!-- Day selector -->
                       <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
-                        <span style="font-size:0.85rem;color:var(--text3)">Calculate for</span>
+                        <span style="font-size:0.85rem;color:var(--text3)" x-text="$store.planner.t('calculate_for')"></span>
                         <div style="display:flex;gap:6px">
                           <template x-for="d in [5, 6, 30]" :key="d">
                             <button class="btn btn-sm" :class="$store.planner.shopDays === d ? 'btn-primary' : 'btn-secondary'"
@@ -529,11 +550,11 @@
                       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
                         <!-- Header -->
                         <div class="shop-row" style="background:var(--surface2)">
-                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600">Food</span>
-                          <span class="col-pkg" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">Pkg (g)</span>
-                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">Need (g)</span>
-                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);font-weight:600;text-align:center">Buy</span>
-                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">Cost</span>
+                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600" x-text="$store.planner.t('col_food')"></span>
+                          <span class="col-pkg" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('shop_col_pkg')"></span>
+                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('shop_col_need')"></span>
+                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);font-weight:600;text-align:center" x-text="$store.planner.t('shop_col_buy')"></span>
+                          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('shop_col_cost')"></span>
                         </div>
 
                         <template x-for="entry in $store.planner.shoppingList" :key="entry.foodId">
@@ -555,13 +576,13 @@
                         </template>
 
                         <div x-show="!$store.planner.shoppingList.length" class="empty-state" style="padding:40px">
-                          <p style="font-size:0.9rem">Add foods to your meals to see the shopping list</p>
+                          <p style="font-size:0.9rem" x-text="$store.planner.t('no_shopping_foods')"></p>
                         </div>
 
                         <!-- Total row -->
                         <div x-show="$store.planner.shoppingList.length > 0"
                           style="display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:8px;padding:10px 14px;background:var(--surface2);border-top:2px solid var(--border)">
-                          <span style="font-weight:700;color:var(--text)">Total for <span x-text="$store.planner.shopDays"></span> days</span>
+                          <span style="font-weight:700;color:var(--text)" x-text="$store.planner.t('total_for') + ' ' + $store.planner.shopDays + $store.planner.t('days_suffix')"></span>
                           <span></span>
                           <span></span>
                           <span></span>
@@ -576,12 +597,12 @@
                     <div>
                       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px">
                         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
-                          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px">Daily Cost</div>
+                          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px" x-text="$store.planner.t('daily_cost_label')"></div>
                           <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.planner.dailyTotals.cost > 0 ? $store.planner.dailyTotals.cost.toFixed(2) + ' lv' : '—'"></div>
                         </div>
                         <template x-for="d in [5, 6, 30]" :key="d">
                           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px" x-text="d + '-Day Cost'"></div>
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px" x-text="d + $store.planner.t('day_cost_label')"></div>
                             <div style="font-size:1.4rem;font-weight:700;color:var(--accent)" x-text="$store.planner.dailyTotals.cost > 0 ? ($store.planner.dailyTotals.cost * d).toFixed(2) + ' lv' : '—'"></div>
                           </div>
                         </template>
@@ -589,31 +610,31 @@
 
                       <!-- Nutrition overview -->
                       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
-                        <div style="font-size:0.8rem;font-weight:600;margin-bottom:16px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">Daily Nutrition Breakdown</div>
+                        <div style="font-size:0.8rem;font-weight:600;margin-bottom:16px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px" x-text="$store.planner.t('daily_nutrition')"></div>
                         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px">
                           <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">Calories</div>
+                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('calories_label')"></div>
                             <div style="font-size:1.2rem;font-weight:700" x-text="$store.planner.dailyTotals.calories + ' kcal'"></div>
-                            <div x-show="$store.planner.activePlan.targetCalories" style="font-size:0.72rem;margin-top:2px" :class="$store.planner.calorieClass === 'bad' ? 'badge badge-danger' : $store.planner.calorieClass === 'warn' ? 'badge badge-warning' : 'badge badge-accent'" x-text="$store.planner.calorieClass === 'good' ? '✅ On target' : $store.planner.calorieClass === 'warn' ? '⚠️ Slightly over' : '🔴 Over target'"></div>
+                            <div x-show="$store.planner.activePlan.targetCalories" style="font-size:0.72rem;margin-top:2px" :class="$store.planner.calorieClass === 'bad' ? 'badge badge-danger' : $store.planner.calorieClass === 'warn' ? 'badge badge-warning' : 'badge badge-accent'" x-text="$store.planner.calorieClass === 'good' ? $store.planner.t('on_target') : $store.planner.calorieClass === 'warn' ? $store.planner.t('slightly_over') : $store.planner.t('over_target')"></div>
                           </div>
                           <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">Protein</div>
+                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('protein_label')"></div>
                             <div style="font-size:1.2rem;font-weight:700;color:var(--accent)" x-text="$store.planner.dailyTotals.protein + 'g'"></div>
-                            <div x-show="$store.planner.activePlan.targetProtein" style="font-size:0.72rem;margin-top:2px" :class="$store.planner.proteinClass === 'bad' ? 'badge badge-danger' : $store.planner.proteinClass === 'warn' ? 'badge badge-warning' : 'badge badge-accent'" x-text="$store.planner.proteinClass === 'good' ? '✅ On target' : $store.planner.proteinClass === 'warn' ? '⚠️ Slightly over' : '🔴 Over target'"></div>
+                            <div x-show="$store.planner.activePlan.targetProtein" style="font-size:0.72rem;margin-top:2px" :class="$store.planner.proteinClass === 'bad' ? 'badge badge-danger' : $store.planner.proteinClass === 'warn' ? 'badge badge-warning' : 'badge badge-accent'" x-text="$store.planner.proteinClass === 'good' ? $store.planner.t('on_target') : $store.planner.proteinClass === 'warn' ? $store.planner.t('slightly_over') : $store.planner.t('over_target')"></div>
                           </div>
                           <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">Fats</div>
+                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('fats_label')"></div>
                             <div style="font-size:1.2rem;font-weight:700" x-text="$store.planner.dailyTotals.fats + 'g'"></div>
                           </div>
                           <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">Carbs</div>
+                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('carbs_label')"></div>
                             <div style="font-size:1.2rem;font-weight:700" x-text="$store.planner.dailyTotals.carbs + 'g'"></div>
                           </div>
                         </div>
 
                         <!-- Macro pie visual (ASCII bars) -->
                         <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
-                          <div style="font-size:0.75rem;color:var(--text3);margin-bottom:10px">Calorie Sources (estimated)</div>
+                          <div style="font-size:0.75rem;color:var(--text3);margin-bottom:10px" x-text="$store.planner.t('calorie_sources')"></div>
                           <div x-data="{ macros: $store.planner.macroPercents }">
                             <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:8px">
                               <div :style="'width:' + macros.proteinPct + '%;background:#22c55e'" title="Protein"></div>
@@ -642,15 +663,15 @@
           <template x-if="$store.planner.modal === 'deletePlan'">
             <div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px" @click.self="$store.planner.closeModal()">
               <div class="modal-box" style="max-width:380px" @click.stop>
-                <h2 style="font-size:1rem;font-weight:700;margin-bottom:8px">Delete Meal Plan</h2>
+                <h2 style="font-size:1rem;font-weight:700;margin-bottom:8px" x-text="$store.planner.t('delete_plan_title')"></h2>
                 <p style="color:var(--text3);font-size:0.875rem;margin-bottom:20px">
-                  Delete <strong x-text="$store.planner.mealPlans.find(p=>p.id===$store.planner.deletingPlanId)?.name"></strong>? This cannot be undone.
+                  <span x-text="$store.planner.mealPlans.find(p=>p.id===$store.planner.deletingPlanId)?.name"></span>? <span x-text="$store.planner.t('confirm_delete_plan')"></span>
                 </p>
                 <div style="display:flex;gap:10px;justify-content:flex-end">
-                  <button class="btn btn-secondary" @click="$store.planner.closeModal()">Cancel</button>
+                  <button class="btn btn-secondary" @click="$store.planner.closeModal()" x-text="$store.planner.t('cancel')"></button>
                   <button class="btn btn-danger" @click="$store.planner.confirmDeletePlan()" :disabled="$store.planner.saving">
-                    <span x-show="!$store.planner.saving">Delete</span>
-                    <span x-show="$store.planner.saving">Deleting…</span>
+                    <span x-show="!$store.planner.saving" x-text="$store.planner.t('delete')"></span>
+                    <span x-show="$store.planner.saving" x-text="$store.planner.t('deleting')"></span>
                   </button>
                 </div>
               </div>
@@ -674,11 +695,25 @@
       </template>
     </div><!-- /root -->
 
+    <style>
+      #sidebar { flex-shrink:0; width:0; overflow:hidden; transition: width 0.25s ease; }
+      #sidebar.open { width: 280px; }
+      @media (max-width: 700px) {
+        #topbar > *:nth-child(n + 3) { display: none !important; }
+        #sidebar { position:fixed; top:0; left:0; height:100vh; z-index:200; box-shadow:none; transition: width 0.25s ease, box-shadow 0.25s ease; }
+        #sidebar.open { width: min(300px, 85vw); box-shadow: 4px 0 32px rgba(0,0,0,0.6); }
+        #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:199; }
+        #sidebar.open ~ #sidebar-overlay, body:has(#sidebar.open) #sidebar-overlay { display:block; }
+        .sidebar-mobile-header { display: flex !important; }
+      }
+      @media (min-width: 701px) { .sidebar-mobile-header { display: none !important; } }
+    </style>
     <script type="module">
       import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/module.esm.js";
       import { auth } from "./js/firebase.js";
       import * as DB from "./js/db.js";
       import { calcItem, sumItems, statusClass, shoppingCalc, round, pricePer100g } from "./js/utils.js";
+      import { translations } from "./js/i18n.js";
       import {
         signInWithEmailAndPassword,
         signOut,
@@ -717,6 +752,11 @@
         modal: null,
         deletingPlanId: null,
         toasts: [],
+
+        // ── i18n ──────────────────────────────────────────────
+        lang: localStorage.getItem("dietbudy-lang") || "en",
+        t(key) { const tr = translations[this.lang] ?? translations.en; return tr[key] ?? translations.en[key] ?? key; },
+        setLang(code) { this.lang = code; localStorage.setItem("dietbudy-lang", code); },
 
         // ── Init ──────────────────────────────────────────────
         init() {
@@ -994,7 +1034,7 @@
               this.activePlan = null;
               this.activePlanId = null;
             }
-            this.toast("Plan deleted!");
+            this.toast(this.t("toast_plan_deleted"));
             this.closeModal();
           } catch (e) {
             this.toast("Delete failed: " + e.message, "error");
