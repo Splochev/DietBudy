@@ -27,7 +27,7 @@
       }
       .meal-item-grid {
         display: grid;
-        grid-template-columns: 1fr 100px 70px 75px 75px 70px 32px;
+        grid-template-columns: 18px 1fr 100px 70px 75px 70px 70px 70px 32px;
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
@@ -43,10 +43,13 @@
       }
       @media (max-width: 768px) {
         .meal-item-grid {
-          grid-template-columns: 1fr 80px 60px 60px 32px;
+          grid-template-columns: 18px 1fr 80px 60px 60px 32px;
         }
-        .col-fats, .col-cost { display: none; }
+        .col-cost, .col-cost5, .col-cost6 { display: none; }
       }
+      .drag-over { outline: 2px dashed var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
+      .drag-handle { cursor: grab; color: var(--text3); display: flex; align-items: center; }
+      .drag-handle:active { cursor: grabbing; }
     </style>
   </head>
   <body>
@@ -239,7 +242,7 @@
                 </div>
                 <div style="display:flex;flex-direction:column;gap:2px">
                   <template x-for="plan in $store.planner.mealPlans" :key="plan.id">
-                    <div class="sidebar-item" :class="{ active: $store.planner.activePlanId === plan.id }"
+                    <div class="sidebar-item" :title="plan.name" :class="{ active: $store.planner.activePlanId === plan.id }"
                       @click="$store.planner.loadPlan(plan.id)">
                       <span x-text="plan.name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem"></span>
                       <div class="item-actions">
@@ -296,15 +299,19 @@
                   <!-- Cost -->
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
                     <span style="color:var(--text3)" x-text="$store.planner.t('daily_cost')"></span>
-                    <span style="font-weight:600;color:var(--text2)" x-text="$store.planner.dailyTotals.cost ? $store.planner.dailyTotals.cost.toFixed(2) + ' lv' : '—'"></span>
+                    <span style="font-weight:600;color:var(--text2)" x-text="$store.planner.dailyTotals.cost ? $store.planner.dailyTotals.cost.toFixed(2) + ' €' : '—'"></span>
                   </div>
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)" x-text="$store.planner.t('fats_label')"></span>
-                    <span style="color:var(--text2)" x-text="$store.planner.dailyTotals.fats ? $store.planner.dailyTotals.fats + 'g' : '—'"></span>
+                    <span style="color:var(--text3)">5-day cost</span>
+                    <span style="color:var(--text2)" x-text="$store.planner.dailyTotals.cost ? ($store.planner.dailyTotals.cost * 5).toFixed(2) + ' €' : '—'"></span>
                   </div>
                   <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)" x-text="$store.planner.t('carbs_label')"></span>
-                    <span style="color:var(--text2)" x-text="$store.planner.dailyTotals.carbs ? $store.planner.dailyTotals.carbs + 'g' : '—'"></span>
+                    <span style="color:var(--text3)">6-day cost</span>
+                    <span style="color:var(--text2)" x-text="$store.planner.dailyTotals.cost ? ($store.planner.dailyTotals.cost * 6).toFixed(2) + ' €' : '—'"></span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+                    <span style="color:var(--text3)">30-day cost</span>
+                    <span style="color:var(--text2)" x-text="$store.planner.dailyTotals.cost ? ($store.planner.dailyTotals.cost * 30).toFixed(2) + ' €' : '—'"></span>
                   </div>
                 </div>
               </div>
@@ -385,11 +392,10 @@
                     </div>
                   </div>
 
-                  <!-- Tabs: Meals | Shopping List | Cost Overview -->
+                  <!-- Tabs: Meals | Shopping List -->
                   <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;width:fit-content">
                     <button class="tab-btn" :class="{ active: $store.planner.tab === 'meals' }" @click="$store.planner.tab = 'meals'" x-text="'\uD83C\uDF7D\uFE0F ' + $store.planner.t('tab_meals')"></button>
                     <button class="tab-btn" :class="{ active: $store.planner.tab === 'shopping' }" @click="$store.planner.tab = 'shopping'" x-text="'\uD83D\uDED2 ' + $store.planner.t('tab_shopping')"></button>
-                    <button class="tab-btn" :class="{ active: $store.planner.tab === 'costs' }" @click="$store.planner.tab = 'costs'" x-text="'\uD83D\uDCB0 ' + $store.planner.t('tab_costs')"></button>
                   </div>
 
                   <!-- ── TAB: MEALS ───────────────────────────────── -->
@@ -415,25 +421,40 @@
                             </template>
                           </span>
                         </div>
-                        <div class="stat-chip">
-                          <span class="stat-val" x-text="$store.planner.dailyTotals.fats + 'g'"></span>
-                          <span class="stat-label" x-text="$store.planner.t('fats_day')"></span>
-                        </div>
-                        <div class="stat-chip">
-                          <span class="stat-val" x-text="$store.planner.dailyTotals.carbs + 'g'"></span>
-                          <span class="stat-label" x-text="$store.planner.t('carbs_day')"></span>
+                        <div class="stat-chip" x-show="$store.planner.dailyTotals.cost > 0">
+                          <span class="stat-val" x-text="$store.planner.dailyTotals.cost.toFixed(2) + ' €'"></span>
+                          <span class="stat-label" x-text="$store.planner.t('cost_day')"></span>
                         </div>
                         <div class="stat-chip" x-show="$store.planner.dailyTotals.cost > 0">
-                          <span class="stat-val" x-text="$store.planner.dailyTotals.cost.toFixed(2) + ' lv'"></span>
-                          <span class="stat-label" x-text="$store.planner.t('cost_day')"></span>
+                          <span class="stat-val" x-text="($store.planner.dailyTotals.cost * 5).toFixed(2) + ' €'"></span>
+                          <span class="stat-label">cost / 5 days</span>
+                        </div>
+                        <div class="stat-chip" x-show="$store.planner.dailyTotals.cost > 0">
+                          <span class="stat-val" x-text="($store.planner.dailyTotals.cost * 6).toFixed(2) + ' €'"></span>
+                          <span class="stat-label">cost / 6 days</span>
+                        </div>
+                        <div class="stat-chip" x-show="$store.planner.dailyTotals.cost > 0">
+                          <span class="stat-val" x-text="($store.planner.dailyTotals.cost * 30).toFixed(2) + ' €'"></span>
+                          <span class="stat-label">cost / 30 days</span>
                         </div>
                       </div>
 
                       <!-- Meals list -->
                       <template x-for="(meal, mealIdx) in $store.planner.activePlan.meals" :key="mealIdx">
-                        <div class="meal-card" style="margin-bottom:14px">
+                        <div class="meal-card" style="margin-bottom:14px"
+                          draggable="true"
+                          @dragstart="$store.planner.dragType = 'meal'; $store.planner.dragMealIdx = mealIdx; $event.dataTransfer.effectAllowed = 'move'"
+                          @dragend="$store.planner.dragType = null"
+                          @dragover.prevent="if ($store.planner.dragType === 'meal') { $event.currentTarget.classList.add('drag-over'); $event.dataTransfer.dropEffect = 'move' }"
+                          @dragleave="$event.currentTarget.classList.remove('drag-over')"
+                          @drop.prevent="$event.currentTarget.classList.remove('drag-over'); if ($store.planner.dragType === 'meal') $store.planner.reorderMeal($store.planner.dragMealIdx, mealIdx)">
                           <!-- Meal header -->
                           <div class="meal-card-header">
+                            <div class="drag-handle" title="Drag to reorder meal">
+                              <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/>
+                              </svg>
+                            </div>
                             <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0"
                               x-text="mealIdx + 1"></div>
                             <input x-model="meal.name" @input="$store.planner.debouncedSave()"
@@ -452,18 +473,32 @@
 
                             <!-- Column header for items -->
                           <div class="meal-item-grid" style="background:var(--surface2);padding-top:6px;padding-bottom:6px">
+                            <span></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600" x-text="$store.planner.t('col_food')"></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_qty')"></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_kcal')"></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);font-weight:600;text-align:center" x-text="$store.planner.t('protein_label')"></span>
-                            <span class="col-fats" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('fats_label')"></span>
                             <span class="col-cost" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_price')"></span>
+                            <span class="col-cost5" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">×5d</span>
+                            <span class="col-cost6" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center">×6d</span>
                             <span></span>
                           </div>
 
                           <!-- Food items -->
-                          <template x-for="(item, itemIdx) in meal.items" :key="itemIdx">
-                            <div class="meal-item-grid">
+                          <template x-for="(item, itemIdx) in meal.items" :key="itemIdx + ':' + item.foodId">
+                            <div class="meal-item-grid"
+                              draggable="true"
+                              @dragstart.stop="$store.planner.dragType = 'item'; $store.planner.dragItemKey = mealIdx + ':' + itemIdx; $event.dataTransfer.effectAllowed = 'move'"
+                              @dragend.stop="$store.planner.dragType = null"
+                              @dragover.prevent="if ($store.planner.dragType === 'item') { $event.stopPropagation(); $event.currentTarget.classList.add('drag-over'); $event.dataTransfer.dropEffect = 'move' }"
+                              @dragleave="$event.currentTarget.classList.remove('drag-over')"
+                              @drop.prevent="$event.currentTarget.classList.remove('drag-over'); if ($store.planner.dragType === 'item') { $event.stopPropagation(); $store.planner.reorderItem(mealIdx, parseInt($store.planner.dragItemKey?.split(':')[1]), itemIdx) }">
+                              <!-- Drag handle -->
+                              <span class="drag-handle" title="Drag to reorder">
+                                <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                  <line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/>
+                                </svg>
+                              </span>
                               <!-- Food name (autocomplete) -->
                               <div style="position:relative" x-data="{ open: false, q: $store.planner.foodName(item.foodId) }">
                                 <input :value="q"
@@ -495,11 +530,14 @@
                               <!-- Computed: Protein -->
                               <span style="text-align:center;color:var(--accent);font-weight:600" x-text="$store.planner.itemCalc(item).protein ? $store.planner.itemCalc(item).protein + 'g' : '—'"></span>
 
-                              <!-- Computed: Fats -->
-                              <span class="col-fats" style="text-align:center;color:var(--text3)" x-text="$store.planner.itemCalc(item).fats ? $store.planner.itemCalc(item).fats + 'g' : '—'"></span>
-
                               <!-- Computed: Cost -->
-                              <span class="col-cost" style="text-align:center;color:var(--text3);font-size:0.8rem" x-text="$store.planner.itemCalc(item).cost != null ? $store.planner.itemCalc(item).cost.toFixed(2) + ' lv' : '—'"></span>
+                              <span class="col-cost" style="text-align:center;color:var(--text3);font-size:0.8rem" x-text="$store.planner.itemCalc(item).cost != null ? $store.planner.itemCalc(item).cost.toFixed(2) + ' €' : '—'"></span>
+
+                              <!-- Computed: Cost ×5 -->
+                              <span class="col-cost5" style="text-align:center;color:var(--text3);font-size:0.8rem" x-text="$store.planner.itemCalc(item).cost != null ? ($store.planner.itemCalc(item).cost * 5).toFixed(2) + ' €' : '—'"></span>
+
+                              <!-- Computed: Cost ×6 -->
+                              <span class="col-cost6" style="text-align:center;color:var(--text3);font-size:0.8rem" x-text="$store.planner.itemCalc(item).cost != null ? ($store.planner.itemCalc(item).cost * 6).toFixed(2) + ' €' : '—'"></span>
 
                               <!-- Remove item -->
                               <button class="btn-icon" style="width:26px;height:26px;color:var(--danger)" title="Remove"
@@ -586,67 +624,7 @@
                           <span></span>
                           <span></span>
                           <span></span>
-                          <span style="font-weight:700;color:var(--accent);text-align:center" x-text="$store.planner.shoppingTotalCost > 0 ? $store.planner.shoppingTotalCost.toFixed(2) + ' lv' : '—'"></span>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-
-                  <!-- ── TAB: COST OVERVIEW ───────────────────────── -->
-                  <template x-if="$store.planner.tab === 'costs'">
-                    <div>
-                      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px">
-                        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
-                          <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px" x-text="$store.planner.t('daily_cost_label')"></div>
-                          <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.planner.dailyTotals.cost > 0 ? $store.planner.dailyTotals.cost.toFixed(2) + ' lv' : '—'"></div>
-                        </div>
-                        <template x-for="d in [5, 6, 30]" :key="d">
-                          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
-                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:8px" x-text="d + $store.planner.t('day_cost_label')"></div>
-                            <div style="font-size:1.4rem;font-weight:700;color:var(--accent)" x-text="$store.planner.dailyTotals.cost > 0 ? ($store.planner.dailyTotals.cost * d).toFixed(2) + ' lv' : '—'"></div>
-                          </div>
-                        </template>
-                      </div>
-
-                      <!-- Nutrition overview -->
-                      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
-                        <div style="font-size:0.8rem;font-weight:600;margin-bottom:16px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px" x-text="$store.planner.t('daily_nutrition')"></div>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px">
-                          <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('calories_label')"></div>
-                            <div style="font-size:1.2rem;font-weight:700" x-text="$store.planner.dailyTotals.calories + ' kcal'"></div>
-                            <div x-show="$store.planner.activePlan.targetCalories" style="font-size:0.72rem;margin-top:2px" :class="$store.planner.calorieClass === 'bad' ? 'badge badge-danger' : $store.planner.calorieClass === 'warn' ? 'badge badge-warning' : 'badge badge-accent'" x-text="$store.planner.calorieClass === 'good' ? $store.planner.t('on_target') : $store.planner.calorieClass === 'warn' ? $store.planner.t('slightly_over') : $store.planner.t('over_target')"></div>
-                          </div>
-                          <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('protein_label')"></div>
-                            <div style="font-size:1.2rem;font-weight:700;color:var(--accent)" x-text="$store.planner.dailyTotals.protein + 'g'"></div>
-                            <div x-show="$store.planner.activePlan.targetProtein" style="font-size:0.72rem;margin-top:2px" :class="$store.planner.proteinClass === 'bad' ? 'badge badge-danger' : $store.planner.proteinClass === 'warn' ? 'badge badge-warning' : 'badge badge-accent'" x-text="$store.planner.proteinClass === 'good' ? $store.planner.t('on_target') : $store.planner.proteinClass === 'warn' ? $store.planner.t('slightly_over') : $store.planner.t('over_target')"></div>
-                          </div>
-                          <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('fats_label')"></div>
-                            <div style="font-size:1.2rem;font-weight:700" x-text="$store.planner.dailyTotals.fats + 'g'"></div>
-                          </div>
-                          <div>
-                            <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px" x-text="$store.planner.t('carbs_label')"></div>
-                            <div style="font-size:1.2rem;font-weight:700" x-text="$store.planner.dailyTotals.carbs + 'g'"></div>
-                          </div>
-                        </div>
-
-                        <!-- Macro pie visual (ASCII bars) -->
-                        <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
-                          <div style="font-size:0.75rem;color:var(--text3);margin-bottom:10px" x-text="$store.planner.t('calorie_sources')"></div>
-                          <div x-data="{ macros: $store.planner.macroPercents }">
-                            <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:8px">
-                              <div :style="'width:' + macros.proteinPct + '%;background:#22c55e'" title="Protein"></div>
-                              <div :style="'width:' + macros.fatsPct + '%;background:#f59e0b'" title="Fats"></div>
-                              <div :style="'width:' + macros.carbsPct + '%;background:#3b82f6'" title="Carbs"></div>
-                            </div>
-                            <div style="display:flex;gap:14px;font-size:0.75rem">
-                              <span><span style="color:#22c55e">●</span> Protein <span style="color:var(--text2)" x-text="macros.proteinPct + '%'"></span></span>
-                              <span><span style="color:#f59e0b">●</span> Fats <span style="color:var(--text2)" x-text="macros.fatsPct + '%'"></span></span>
-                              <span><span style="color:#3b82f6">●</span> Carbs <span style="color:var(--text2)" x-text="macros.carbsPct + '%'"></span></span>
-                            </div>
-                          </div>
+                          <span style="font-weight:700;color:var(--accent);text-align:center" x-text="$store.planner.shoppingTotalCost > 0 ? $store.planner.shoppingTotalCost.toFixed(2) + ' €' : '—'"></span>
                         </div>
                       </div>
                     </div>
@@ -752,6 +730,9 @@
         modal: null,
         deletingPlanId: null,
         toasts: [],
+        dragMealIdx: null,
+        dragItemKey: null,     // 'mealIdx:itemIdx'
+        dragType: null,        // 'meal' | 'item'
 
         // ── i18n ──────────────────────────────────────────────
         lang: localStorage.getItem("dietbudy-lang") || "en",
@@ -767,10 +748,16 @@
               this.user = user;
               this.authState = "authenticated";
               await this.loadData();
-              // Auto-load plan from URL param
+              // Auto-load plan from URL param, then last-used plan in Firestore
               const params = new URLSearchParams(window.location.search);
               const planId = params.get("plan");
-              if (planId) this.loadPlan(planId);
+              if (planId) {
+                this.loadPlan(planId);
+              } else {
+                const lastId = await DB.getLastPlan(this.user.uid);
+                const fallback = lastId || (this.mealPlans[0]?.id ?? null);
+                if (fallback) this.loadPlan(fallback);
+              }
             } else {
               this.user = null;
               this.authState = "unauthenticated";
@@ -865,6 +852,7 @@
           this.activePlanId = id;
           this.shopOverrides = {};
           this.tab = "meals";
+          if (this.user) DB.setLastPlan(this.user.uid, id).catch(() => {});
         },
 
         async _savePlan() {
@@ -899,6 +887,24 @@
 
         removeMeal(idx) {
           this.activePlan.meals.splice(idx, 1);
+          this.debouncedSave();
+        },
+
+        reorderMeal(fromIdx, toIdx) {
+          if (fromIdx === toIdx || fromIdx == null) return;
+          const meals = [...this.activePlan.meals];
+          const [moved] = meals.splice(fromIdx, 1);
+          meals.splice(toIdx, 0, moved);
+          this.activePlan.meals = meals;
+          this.debouncedSave();
+        },
+
+        reorderItem(mealIdx, fromIdx, toIdx) {
+          if (fromIdx === toIdx || fromIdx == null) return;
+          const meals = JSON.parse(JSON.stringify(this.activePlan.meals));
+          const [moved] = meals[mealIdx].items.splice(fromIdx, 1);
+          meals[mealIdx].items.splice(toIdx, 0, moved);
+          this.activePlan = { ...this.activePlan, meals };
           this.debouncedSave();
         },
 
@@ -969,22 +975,22 @@
             let cost = 0;
 
             if (food.packageWeight > 0) {
-              const pkgs = Math.ceil(gramsToUse / food.packageWeight);
+              const pkgs = round(gramsToUse / food.packageWeight, 2);
               buyDisplay = pkgs + " pkg";
               if (food.price > 0) {
                 cost = round(pkgs * food.price, 2);
-                costDisplay = cost.toFixed(2) + " lv";
+                costDisplay = cost.toFixed(2) + " €";
               }
             } else if (food.priceType === "per_kg" && food.price > 0) {
               const kgs = gramsToUse / 1000;
               cost = round(kgs * food.price, 2);
-              costDisplay = cost.toFixed(2) + " lv";
+              costDisplay = cost.toFixed(2) + " €";
               buyDisplay = round(gramsToUse / 1000, 2) + " kg";
             }
 
             const pp = pricePer100g(food);
             const priceInfo = food.price > 0
-              ? (food.priceType === "per_kg" ? food.price.toFixed(2) + " lv/kg" : food.price.toFixed(2) + " lv/pkg" + (food.packageWeight ? " (" + food.packageWeight + "g)" : ""))
+              ? (food.priceType === "per_kg" ? food.price.toFixed(2) + " €/kg" : food.price.toFixed(2) + " €/pkg" + (food.packageWeight ? " (" + food.packageWeight + "g)" : ""))
               : "";
 
             return {

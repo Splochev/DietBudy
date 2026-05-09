@@ -9,6 +9,7 @@ import {
   collection,
   doc,
   getDocs,
+  getDoc,
   addDoc,
   setDoc,
   updateDoc,
@@ -22,45 +23,16 @@ import {
 const col  = (...segs) => collection(db, segs.join("/"));
 const docR = (...segs) => doc(db, segs.join("/"));
 
-// ─── LOCAL CACHE ──────────────────────────────────────────────
-function cacheGet(key) {
-  try {
-    const raw = localStorage.getItem("dietbudy:" + key);
-    if (!raw) return null;
-    const { data, ts, ttl } = JSON.parse(raw);
-    if (ttl && Date.now() - ts > ttl) {
-      localStorage.removeItem("dietbudy:" + key);
-      return null;
-    }
-    return data;
-  } catch { return null; }
-}
-
-function cacheSet(key, data, ttl = 0) {
-  try {
-    localStorage.setItem("dietbudy:" + key, JSON.stringify({ data, ts: Date.now(), ttl }));
-  } catch { /* ignore quota errors */ }
-}
-
-function cacheBust(...keys) {
-  for (const k of keys) localStorage.removeItem("dietbudy:" + k);
-}
-
 // ─── FOODS ────────────────────────────────────────────────────
 // Food shape:
 //   { id, userId, name, calories, protein, fats?, carbs?,
 //     packageWeight, price, priceType: "per_package"|"per_kg" }
 
 export async function getFoods(uid) {
-  const key = `foods:${uid}`;
-  const cached = cacheGet(key);
-  if (cached) return cached;
   const snap = await getDocs(
     query(col(`users/${uid}/foods`), orderBy("name"))
   );
-  const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  cacheSet(key, data);
-  return data;
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 export async function addFood(uid, food) {
@@ -77,7 +49,6 @@ export async function addFood(uid, food) {
     createdAt:     serverTimestamp(),
   };
   const ref = await addDoc(col(`users/${uid}/foods`), payload);
-  cacheBust(`foods:${uid}`);
   return { id: ref.id, ...payload };
 }
 
@@ -94,12 +65,10 @@ export async function updateFood(uid, fid, changes) {
     updatedAt:     serverTimestamp(),
   };
   await updateDoc(docR(`users/${uid}/foods/${fid}`), payload);
-  cacheBust(`foods:${uid}`);
 }
 
 export async function deleteFood(uid, fid) {
   await deleteDoc(docR(`users/${uid}/foods/${fid}`));
-  cacheBust(`foods:${uid}`);
 }
 
 // ─── MEAL PLANS ───────────────────────────────────────────────
@@ -108,15 +77,10 @@ export async function deleteFood(uid, fid) {
 //     meals: [ { name, items: [ { foodId, quantity } ] } ] }
 
 export async function getMealPlans(uid) {
-  const key = `mealplans:${uid}`;
-  const cached = cacheGet(key);
-  if (cached) return cached;
   const snap = await getDocs(
     query(col(`users/${uid}/mealPlans`), orderBy("createdAt"))
   );
-  const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  cacheSet(key, data);
-  return data;
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 export async function saveMealPlan(uid, plan) {
@@ -133,17 +97,31 @@ export async function saveMealPlan(uid, plan) {
 
   if (plan.id) {
     await updateDoc(docR(`users/${uid}/mealPlans/${plan.id}`), payload);
-    cacheBust(`mealplans:${uid}`);
     return { ...plan, ...payload };
   } else {
     payload.createdAt = serverTimestamp();
     const ref = await addDoc(col(`users/${uid}/mealPlans`), payload);
-    cacheBust(`mealplans:${uid}`);
     return { id: ref.id, ...payload };
   }
 }
 
 export async function deleteMealPlan(uid, pid) {
   await deleteDoc(docR(`users/${uid}/mealPlans/${pid}`));
-  cacheBust(`mealplans:${uid}`);
+}
+
+// ─── FOOD FLAG ────────────────────────────────────────────────
+export async function flagFood(uid, fid, flagged) {
+  await updateDoc(docR(`users/${uid}/foods/${fid}`), { flagged });
+}
+
+// ─── USER PREFERENCES ────────────────────────────────────────
+export async function getLastPlan(uid) {
+  try {
+    const snap = await getDoc(docR(`users/${uid}/prefs/planner`));
+    return snap.exists() ? (snap.data().lastPlanId || null) : null;
+  } catch { return null; }
+}
+
+export async function setLastPlan(uid, planId) {
+  await setDoc(docR(`users/${uid}/prefs/planner`), { lastPlanId: planId }, { merge: true });
 }

@@ -169,31 +169,12 @@
                 </div>
                 <div style="display:flex;flex-direction:column;gap:2px">
                   <template x-for="plan in $store.diet.mealPlans" :key="plan.id">
-                    <a :href="'./planner.html?plan=' + plan.id" class="sidebar-item" style="text-decoration:none;color:var(--text)">
+                    <a :href="'./planner.html?plan=' + plan.id" :title="plan.name" class="sidebar-item" style="text-decoration:none;color:var(--text)">
                       <span x-text="plan.name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem"></span>
                       <span style="font-size:0.7rem;color:var(--text3)" x-text="plan.targetCalories ? plan.targetCalories + ' kcal' : ''"></span>
                     </a>
                   </template>
                   <div x-show="!$store.diet.mealPlans.length" style="font-size:0.8rem;color:var(--text3);padding:8px 12px" x-text="$store.diet.t('no_plans_sidebar')"></div>
-                </div>
-              </div>
-
-              <!-- Stats summary -->
-              <div style="padding:12px 16px;flex:1">
-                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:8px" x-text="$store.diet.t('food_db_label')"></div>
-                <div style="display:flex;flex-direction:column;gap:6px">
-                  <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)" x-text="$store.diet.t('total_foods')"></span>
-                    <span style="color:var(--text);font-weight:600" x-text="$store.diet.foods.length"></span>
-                  </div>
-                  <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)" x-text="$store.diet.t('avg_protein')"></span>
-                    <span style="color:var(--accent);font-weight:600" x-text="$store.diet.avgProtein + 'g'"></span>
-                  </div>
-                  <div style="display:flex;justify-content:space-between;font-size:0.8rem">
-                    <span style="color:var(--text3)" x-text="$store.diet.t('avg_calories')"></span>
-                    <span style="color:var(--text2);font-weight:600" x-text="$store.diet.avgCalories + ' kcal'"></span>
-                  </div>
                 </div>
               </div>
 
@@ -220,7 +201,7 @@
             <div id="sidebar-overlay" @click="$store.diet.sidebarOpen = false"></div>
 
             <!-- ═ MAIN CONTENT ═══════════════════════════════════ -->
-            <main style="flex:1;overflow:auto;padding:20px">
+            <main id="food-main" style="flex:1;overflow:auto;padding:16px">
 
               <!-- Page header -->
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
@@ -235,11 +216,11 @@
               </div>
 
               <!-- Search bar -->
-              <div style="position:relative;margin-bottom:16px;max-width:400px">
+              <div style="position:relative;margin-bottom:16px">
                 <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input x-model="$store.diet.foodSearch" :placeholder="$store.diet.t('search_placeholder')" style="width:100%;padding-left:34px" />
+                <input x-model="$store.diet.foodSearch" @input="$store.diet.foodPage = 1" :placeholder="$store.diet.t('search_placeholder')" style="width:100%;padding-left:34px" />
               </div>
 
               <!-- Table -->
@@ -247,31 +228,35 @@
                 <table class="food-table">
                   <thead>
                     <tr>
+                      <th style="width:32px"></th>
                       <th x-text="$store.diet.t('col_name')"></th>
-                      <th style="text-align:right"><span x-text="$store.diet.t('col_calories')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
+                      <th class="food-col-sm" style="text-align:right"><span x-text="$store.diet.t('col_calories')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
                       <th style="text-align:right"><span x-text="$store.diet.t('col_protein')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
-                      <th style="text-align:right"><span x-text="$store.diet.t('col_fats')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
-                      <th style="text-align:right"><span x-text="$store.diet.t('col_carbs')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
-                      <th style="text-align:right"><span x-text="$store.diet.t('col_weight')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_weight_unit')"></span></th>
+                      <th class="food-col-md" style="text-align:right"><span x-text="$store.diet.t('col_fats')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
+                      <th class="food-col-md" style="text-align:right"><span x-text="$store.diet.t('col_carbs')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_per_100g')"></span></th>
+                      <th class="food-col-md" style="text-align:right"><span x-text="$store.diet.t('col_weight')"></span><br><span style="font-size:0.6rem;font-weight:400" x-text="$store.diet.t('col_weight_unit')"></span></th>
                       <th style="text-align:right" x-text="$store.diet.t('col_price')"></th>
-                      <th style="text-align:right" x-text="$store.diet.t('col_price_100g')"></th>
+                      <th class="food-col-sm" style="text-align:right" x-text="$store.diet.t('col_price_100g')"></th>
                       <th></th>
                     </tr>
                   </thead>
                   <tbody>
-                    <template x-for="food in $store.diet.filteredFoods" :key="food.id">
-                      <tr>
+                    <template x-for="food in $store.diet.pagedFoods" :key="food.id">
+                      <tr :style="food.flagged ? 'background:var(--accent-bg);border-left:3px solid var(--accent)' : 'border-left:3px solid transparent'">
+                        <td style="width:32px;text-align:center;padding:0 8px">
+                          <input type="checkbox" :checked="food.flagged" @change="$store.diet.toggleFoodFlag(food)" style="cursor:pointer;width:14px;height:14px">
+                        </td>
                         <td>
                           <span style="font-weight:500" x-text="food.name"></span>
                           <span x-show="food.priceType === 'per_kg'" class="badge" style="margin-left:6px;font-size:0.6rem;padding:2px 6px">/kg</span>
                         </td>
-                        <td style="text-align:right;color:var(--text2)" x-text="food.calories || '—'"></td>
+                        <td class="food-col-sm" style="text-align:right;color:var(--text2)" x-text="food.calories || '—'"></td>
                         <td style="text-align:right;color:var(--accent);font-weight:600" x-text="food.protein ? food.protein + 'g' : '—'"></td>
-                        <td style="text-align:right;color:var(--text3)" x-text="food.fats ? food.fats + 'g' : '—'"></td>
-                        <td style="text-align:right;color:var(--text3)" x-text="food.carbs ? food.carbs + 'g' : '—'"></td>
-                        <td style="text-align:right;color:var(--text2)" x-text="food.packageWeight ? food.packageWeight + 'g' : '—'"></td>
-                        <td style="text-align:right;color:var(--text2)" x-text="food.price ? food.price.toFixed(2) + ' lv' : '—'"></td>
-                        <td style="text-align:right;font-size:0.8rem;color:var(--text3)" x-text="$store.diet.formatPricePer100g(food)"></td>
+                        <td class="food-col-md" style="text-align:right;color:var(--text3)" x-text="food.fats ? food.fats + 'g' : '—'"></td>
+                        <td class="food-col-md" style="text-align:right;color:var(--text3)" x-text="food.carbs ? food.carbs + 'g' : '—'"></td>
+                        <td class="food-col-md" style="text-align:right;color:var(--text2)" x-text="food.packageWeight ? food.packageWeight + 'g' : '—'"></td>
+                        <td style="text-align:right;color:var(--text2);white-space:nowrap" x-text="food.price ? food.price.toFixed(2) + ' €' : '—'"></td>
+                        <td class="food-col-sm" style="text-align:right;font-size:0.8rem;color:var(--text3)" x-text="$store.diet.formatPricePer100g(food)"></td>
                         <td style="text-align:right">
                           <div style="display:flex;gap:4px;justify-content:flex-end">
                             <button class="btn-icon" style="width:28px;height:28px" title="Edit" @click="$store.diet.openModal('editFood', food.id)">
@@ -292,7 +277,7 @@
                     </template>
                     <!-- Empty state -->
                     <tr x-show="!$store.diet.filteredFoods.length">
-                      <td colspan="9">
+                      <td colspan="10">
                         <div class="empty-state">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                             <path d="M5 11 Q5 19 12 19 Q19 19 19 11"/>
@@ -307,6 +292,19 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+
+              <!-- Pagination -->
+              <div x-show="$store.diet.totalFoodPages > 1" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px">
+                <button class="btn btn-secondary" style="padding:4px 12px;font-size:0.8rem"
+                  :disabled="$store.diet.foodPage === 1"
+                  @click="$store.diet.foodPage--">&#8249; Prev</button>
+                <span style="font-size:0.85rem;color:var(--text3)">
+                  <span x-text="$store.diet.foodPage"></span> / <span x-text="$store.diet.totalFoodPages"></span>
+                </span>
+                <button class="btn btn-secondary" style="padding:4px 12px;font-size:0.8rem"
+                  :disabled="$store.diet.foodPage >= $store.diet.totalFoodPages"
+                  @click="$store.diet.foodPage++">Next &#8250;</button>
               </div>
             </main>
           </div><!-- /body -->
@@ -433,6 +431,8 @@
     </div><!-- /root -->
 
     <style>
+      #food-main { padding: 16px; }
+      @media (min-width: 768px) { #food-main { padding: 20px 24px; } }
       #sidebar { flex-shrink:0; width:0; overflow:hidden; transition: width 0.25s ease; }
       #sidebar.open { width: 280px; }
       @media (max-width: 700px) {
@@ -465,6 +465,8 @@
         foods: [],
         mealPlans: [],
         foodSearch: "",
+        foodPage: 1,
+        foodPageSize: 20,
 
         // ── UI ────────────────────────────────────────────────
         sidebarOpen: window.innerWidth >= 769,
@@ -524,6 +526,15 @@
           return this.foods.filter(f => f.name.toLowerCase().includes(q));
         },
 
+        get pagedFoods() {
+          const start = (this.foodPage - 1) * this.foodPageSize;
+          return this.filteredFoods.slice(start, start + this.foodPageSize);
+        },
+
+        get totalFoodPages() {
+          return Math.max(1, Math.ceil(this.filteredFoods.length / this.foodPageSize));
+        },
+
         get avgProtein() {
           if (!this.foods.length) return 0;
           return round(this.foods.reduce((s, f) => s + (f.protein || 0), 0) / this.foods.length, 1);
@@ -540,13 +551,13 @@
 
         get previewPricePer100g() {
           const pp = pricePer100g(this.foodForm);
-          return pp != null ? round(pp, 3) + " lv" : "";
+          return pp != null ? round(pp, 3) + " €" : "";
         },
 
         // ── Format helpers ────────────────────────────────────
         formatPricePer100g(food) {
           const pp = pricePer100g(food);
-          return pp != null ? round(pp, 3) + " lv" : "—";
+          return pp != null ? round(pp, 3) + " €" : "—";
         },
 
         // ── Modal management ──────────────────────────────────
@@ -611,6 +622,17 @@
             this.formError = e.message;
           } finally {
             this.saving = false;
+          }
+        },
+
+        // ── Food flag ─────────────────────────────────────────
+        async toggleFoodFlag(food) {
+          const newFlagged = !food.flagged;
+          try {
+            await DB.flagFood(this.user.uid, food.id, newFlagged);
+            this.foods = this.foods.map(f => f.id === food.id ? { ...f, flagged: newFlagged } : f);
+          } catch (e) {
+            this.toast("Failed to update flag: " + e.message, "error");
           }
         },
 
