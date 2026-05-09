@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DietBudy – Sign In</title>
+    <title>DietBuddy – Sign In</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./css/app.css" />
     <style>
@@ -30,7 +30,7 @@
             <ellipse cx="16.5" cy="6" rx="2.5" ry="4"/>
             <line x1="16.5" y1="10" x2="16.5" y2="22"/>
           </svg>
-          <span>DietBudy</span>
+          <span>DietBuddy</span>
         </div>
 
         <!-- Language toggle -->
@@ -92,7 +92,7 @@
         password: "",
         loading: false,
         error: "",
-        lang: localStorage.getItem("dietbudy-lang") || "en",
+        lang: localStorage.getItem("dietbuddy-lang") || "en",
 
         t(key) {
           const tr = translations[this.lang] ?? translations.en;
@@ -101,7 +101,7 @@
 
         setLang(code) {
           this.lang = code;
-          localStorage.setItem("dietbudy-lang", code);
+          localStorage.setItem("dietbuddy-lang", code);
         },
 
         async login() {

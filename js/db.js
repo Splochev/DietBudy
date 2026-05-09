@@ -1,4 +1,4 @@
-// js/db.js — All Firestore read/write operations for DietBudy
+// js/db.js — All Firestore read/write operations for DietBuddy
 //
 // Firestore data model:
 //   /users/{uid}/foods/{fid}        — user's food database

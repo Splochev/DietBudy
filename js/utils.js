@@ -1,4 +1,4 @@
-// js/utils.js — Shared utility helpers for DietBudy
+// js/utils.js — Shared utility helpers for DietBuddy
 
 /** Generate a simple unique ID */
 export function generateId() {

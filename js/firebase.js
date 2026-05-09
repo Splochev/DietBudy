@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/fireba
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-// Same Firebase project as GymBudy → shared auth session (SSO-like)
+// Same Firebase project as GymBuddy → shared auth session (SSO-like)
 const firebaseConfig = {
   apiKey: "AIzaSyCIJlxyWuBSUMepIfPGKaeBvcHDsdFVftY",
   authDomain: "personalbudy-2f735.firebaseapp.com",
