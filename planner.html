@@ -8,13 +8,14 @@
     <link rel="stylesheet" href="./css/app.css" />
     <style>
       .tab-btn {
-        padding: 7px 16px;
+        padding: 7px 14px;
         border-radius: var(--radius-sm);
         font-size: 0.8rem;
         font-weight: 500;
         color: var(--text3);
         transition: var(--trans);
         cursor: pointer;
+        white-space: nowrap;
       }
       .tab-btn.active {
         background: var(--accent-bg);
@@ -25,12 +26,17 @@
         background: var(--surface2);
         color: var(--text);
       }
+
+      /* ── MEAL ITEM GRID ─────────────────────────── */
+      /* Mobile-first: drag | food | [stats] | remove */
       .meal-item-grid {
         display: grid;
-        grid-template-columns: 18px 1fr 100px 70px 75px 70px 70px 70px 32px;
+        grid-template-columns: 20px 1fr 32px;
+        grid-template-rows: auto auto;
+        row-gap: 4px;
         align-items: center;
         gap: 8px;
-        padding: 8px 16px;
+        padding: 10px 12px;
         border-bottom: 1px solid var(--border);
         font-size: 0.875rem;
       }
@@ -41,34 +47,46 @@
         width: 100%;
         text-align: center;
       }
-      /* transparent wrapper on desktop — children flow into the parent grid */
-      .item-stats-row { display: contents; }
+      /* Mobile layout: drag handle spans rows 1-2 */
+      .meal-item-grid > :nth-child(1) { grid-column: 1; grid-row: 1 / 3; align-self: center; }
+      /* Food input in row 1 */
+      .meal-item-grid > :nth-child(2) { grid-column: 2; grid-row: 1; }
+      /* Stats row becomes a flex row in row 2 */
+      .meal-item-grid > .item-stats-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        align-items: center;
+        grid-column: 2;
+        grid-row: 2;
+      }
+      .item-stats-row input { width: 62px; flex-shrink: 0; }
+      .item-stats-row span { font-size: 0.78rem; }
+      /* Remove button spans rows 1-2 */
+      .meal-item-grid > :nth-child(4) { grid-column: 3; grid-row: 1 / 3; align-self: center; }
+
+      /* Desktop: expand to full column grid */
+      @media (min-width: 921px) {
+        .meal-header-row { display: grid !important; }
+        .meal-item-grid {
+          grid-template-columns: 18px 1fr 100px 70px 75px 70px 70px 70px 32px;
+          grid-template-rows: auto;
+          row-gap: 0;
+          padding: 8px 16px;
+        }
+        /* Reset mobile overrides */
+        .meal-item-grid > :nth-child(1) { grid-column: auto; grid-row: auto; }
+        .meal-item-grid > :nth-child(2) { grid-column: auto; grid-row: auto; }
+        .meal-item-grid > :nth-child(4) { grid-column: auto; grid-row: auto; }
+        /* stats row: display:contents so children flow into parent grid */
+        .meal-item-grid > .item-stats-row { display: contents; }
+        .col-cost5, .col-cost6 { display: block; }
+      }
       @media (max-width: 920px) {
         .meal-header-row { display: none !important; }
-        .meal-item-grid {
-          grid-template-columns: 20px 1fr 32px;
-          grid-template-rows: auto auto;
-          row-gap: 4px;
-          padding: 10px 16px;
-        }
-        /* drag spans both rows */
-        .meal-item-grid > :nth-child(1) { grid-column: 1; grid-row: 1 / 3; align-self: center; }
-        /* food input row 1 */
-        .meal-item-grid > :nth-child(2) { grid-column: 2; grid-row: 1; }
-        /* stats row — becomes a real flex row */
-        .meal-item-grid > .item-stats-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 4px 10px;
-          align-items: center;
-          grid-column: 2;
-          grid-row: 2;
-        }
-        .item-stats-row input { width: 60px; }
-        /* remove button spans both rows */
-        .meal-item-grid > :nth-child(4) { grid-column: 3; grid-row: 1 / 3; align-self: center; }
         .col-cost5, .col-cost6 { display: none; }
       }
+
       .drag-over { outline: 2px dashed var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
       .drag-handle { cursor: grab; color: var(--text3); display: flex; align-items: center; }
       .drag-handle:active { cursor: grabbing; }
@@ -135,7 +153,7 @@
         <div style="display:flex;flex-direction:column;height:100vh">
 
           <!-- ═ TOP BAR ═══════════════════════════════════════════ -->
-          <header id="topbar" style="display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0">
+          <header id="topbar" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden">
             <button class="btn-icon" @click="$store.planner.sidebarOpen = !$store.planner.sidebarOpen" title="Toggle sidebar">
               <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
             </button>
@@ -152,7 +170,7 @@
               DietBuddy
             </div>
 
-            <nav style="display:flex;gap:4px;margin-left:8px">
+            <nav class="topbar-nav" style="display:flex;gap:4px;margin-left:8px">
               <a href="./food-manager.html"
                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)"
                 onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'"
@@ -383,29 +401,29 @@
 
               <!-- Active plan editor -->
               <template x-if="$store.planner.activePlan">
-                <div style="padding:20px">
+                <div style="padding:clamp(12px, 3vw, 20px)">
 
                   <!-- Plan header / settings -->
-                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:clamp(12px,3vw,20px);margin-bottom:16px">
                     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
-                      <div style="flex:1;min-width:200px">
+                      <div style="flex:1;min-width:0;width:100%">
                         <label class="form-label" x-text="$store.planner.t('plan_name_label')"></label>
                         <input x-model="$store.planner.activePlan.name" @input="$store.planner.debouncedSave()"
                           style="font-size:1rem;font-weight:600;background:transparent;border:1px solid transparent;padding:4px 8px;width:100%"
                           :placeholder="$store.planner.t('plan_name_placeholder')" />
                       </div>
-                      <div style="display:flex;gap:10px;flex-wrap:wrap">
-                        <div style="min-width:110px">
+                      <div style="display:flex;gap:10px;flex-wrap:wrap;width:100%;margin-top:8px">
+                        <div style="flex:1;min-width:90px;max-width:150px">
                           <label class="form-label" x-text="$store.planner.t('target_calories_label')"></label>
                           <input type="number" x-model.number="$store.planner.activePlan.targetCalories"
                             @input="$store.planner.debouncedSave()" placeholder="2000" min="0" style="width:100%" />
                         </div>
-                        <div style="min-width:110px">
+                        <div style="flex:1;min-width:90px;max-width:150px">
                           <label class="form-label" x-text="$store.planner.t('target_protein_label')"></label>
                           <input type="number" x-model.number="$store.planner.activePlan.targetProtein"
                             @input="$store.planner.debouncedSave()" placeholder="150" min="0" style="width:100%" />
                         </div>
-                        <div style="min-width:80px">
+                        <div style="flex:1;min-width:70px;max-width:110px">
                           <label class="form-label" x-text="$store.planner.t('days_label')"></label>
                           <input type="number" x-model.number="$store.planner.activePlan.days"
                             @input="$store.planner.debouncedSave()" placeholder="5" min="1" max="365" style="width:100%" />
@@ -415,7 +433,7 @@
                   </div>
 
                   <!-- Tabs: Meals | Shopping List -->
-                  <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;width:fit-content">
+                  <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;width:fit-content;max-width:100%">
                     <button class="tab-btn" :class="{ active: $store.planner.tab === 'meals' }" @click="$store.planner.tab = 'meals'" x-text="'\uD83C\uDF7D\uFE0F ' + $store.planner.t('tab_meals')"></button>
                     <button class="tab-btn" :class="{ active: $store.planner.tab === 'shopping' }" @click="$store.planner.tab = 'shopping'" x-text="'\uD83D\uDED2 ' + $store.planner.t('tab_shopping')"></button>
                   </div>
@@ -424,7 +442,7 @@
                   <template x-if="$store.planner.tab === 'meals'">
                     <div>
                       <!-- Daily stats bar -->
-                      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+                      <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none">
                         <div class="stat-chip" :class="$store.planner.calorieClass">
                           <span class="stat-val" x-text="$store.planner.dailyTotals.calories"></span>
                           <span class="stat-label">
@@ -480,12 +498,12 @@
                             <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0"
                               x-text="mealIdx + 1"></div>
                             <input x-model="meal.name" @input="$store.planner.debouncedSave()"
-                              style="font-size:0.9rem;font-weight:600;background:transparent;border:none;flex:1;padding:2px 4px"
+                              style="font-size:0.9rem;font-weight:600;background:transparent;border:none;flex:1;min-width:0;padding:2px 4px"
                               placeholder="Meal name (e.g. Breakfast)" />
                             <!-- Meal totals -->
-                            <div style="display:flex;gap:12px;font-size:0.78rem;color:var(--text3);flex-shrink:0">
+                            <div class="meal-totals" style="display:flex;gap:8px;font-size:0.75rem;color:var(--text3);flex-shrink:0;white-space:nowrap">
                               <span><span x-text="$store.planner.mealTotals(mealIdx).calories"></span> kcal</span>
-                              <span style="color:var(--accent)"><span x-text="$store.planner.mealTotals(mealIdx).protein"></span>g prot</span>
+                              <span style="color:var(--accent)"><span x-text="$store.planner.mealTotals(mealIdx).protein"></span>g P</span>
                             </div>
                             <button class="btn-icon" style="color:var(--danger);width:26px;height:26px;flex-shrink:0" title="Remove meal"
                               @click="$store.planner.removeMeal(mealIdx)">
@@ -595,8 +613,8 @@
                   <template x-if="$store.planner.tab === 'shopping'">
                     <div>
                       <!-- Day selector -->
-                      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
-                        <span style="font-size:0.85rem;color:var(--text3)" x-text="$store.planner.t('calculate_for')"></span>
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;row-gap:8px">
+                        <span style="font-size:0.85rem;color:var(--text3);white-space:nowrap" x-text="$store.planner.t('calculate_for')"></span>
                         <div style="display:flex;gap:6px">
                           <template x-for="d in [5, 6, 30]" :key="d">
                             <button class="btn btn-sm" :class="$store.planner.shopDays === d ? 'btn-primary' : 'btn-secondary'"
@@ -651,12 +669,9 @@
 
                         <!-- Total row -->
                         <div x-show="$store.planner.shoppingList.length > 0"
-                          style="display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:8px;padding:10px 14px;background:var(--surface2);border-top:2px solid var(--border)">
+                          style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:var(--surface2);border-top:2px solid var(--border)">
                           <span style="font-weight:700;color:var(--text)" x-text="$store.planner.t('total_for') + ' ' + $store.planner.shopDays + $store.planner.t('days_suffix')"></span>
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                          <span style="font-weight:700;color:var(--accent);text-align:center" x-text="$store.planner.shoppingTotalCost > 0 ? $store.planner.shoppingTotalCost.toFixed(2) + ' €' : '—'"></span>
+                          <span style="font-weight:700;color:var(--accent)" x-text="$store.planner.shoppingTotalCost > 0 ? $store.planner.shoppingTotalCost.toFixed(2) + ' €' : '—'"></span>
                         </div>
                       </div>
                     </div>
@@ -708,15 +723,32 @@
     <style>
       #sidebar { flex-shrink:0; width:0; overflow:hidden; transition: width 0.25s ease; }
       #sidebar.open { width: 280px; }
+
+      /* Topbar: hide desktop nav + user text on mobile, keep hamburger + logo + save dot */
       @media (max-width: 920px) {
-        #topbar > *:nth-child(n + 3) { display: none !important; }
+        .topbar-nav { display: none !important; }
+        #topbar > *:nth-child(n + 5) { display: none !important; } /* hide lang, user, logout */
+        #topbar { gap: 8px; padding: 10px 12px; }
         #sidebar { position:fixed; top:0; left:0; height:100vh; z-index:200; box-shadow:none; transition: width 0.25s ease, box-shadow 0.25s ease; }
         #sidebar.open { width: min(300px, 85vw); box-shadow: 4px 0 32px rgba(0,0,0,0.6); }
         #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:199; }
         #sidebar.open ~ #sidebar-overlay, body:has(#sidebar.open) #sidebar-overlay { display:block; }
         .sidebar-mobile-header { display: flex !important; }
+        /* Hide scrollbar on stat chips row */
+        .stat-chips-row::-webkit-scrollbar { display: none; }
+        /* Reduce stat chip min-width on mobile */
+        .stat-chip { min-width: 76px; padding: 8px 12px; }
+        /* Meal card header: allow totals to shrink/hide if needed */
+        .meal-card-header { flex-wrap: wrap; }
+        .meal-totals { font-size: 0.7rem; }
+        /* Plan settings on mobile: full width stacking */
+        .plan-settings-header { flex-direction: column !important; }
       }
       @media (min-width: 921px) { .sidebar-mobile-header { display: none !important; } }
+
+      /* Ensure main and all children can't overflow viewport */
+      main { min-width: 0; overflow-x: hidden; }
+      .meal-card { min-width: 0; }
     </style>
     <script type="module">
       import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/module.esm.js";

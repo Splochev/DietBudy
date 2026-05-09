@@ -443,11 +443,17 @@ input[type="checkbox"] {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 50px 52px;
+  padding: 28px 20px;
   width: 100%;
   max-width: 560px;
   box-shadow: var(--shadow);
   animation: fadeIn 0.3s;
+}
+@media (min-width: 480px) {
+  .auth-card { padding: 40px 36px; }
+}
+@media (min-width: 640px) {
+  .auth-card { padding: 50px 52px; }
 }
 .auth-logo {
   display: flex;
@@ -495,15 +501,33 @@ input[type="checkbox"] {
 .progress-fill.bad   { background: var(--danger); }
 
 /* ── SHOPPING LIST ───────────────────────────────────────────── */
+/* Mobile-first: checkbox | name | need(g) | buy */
 .shop-row {
   display: grid;
-  grid-template-columns: 28px 1fr 90px 90px 90px 90px;
+  grid-template-columns: 28px 1fr 72px 72px;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 6px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border);
   font-size: 0.875rem;
   transition: background 0.15s, opacity 0.15s;
+}
+/* hide pkg + cost columns on mobile */
+.shop-row .col-pkg { display: none; }
+.shop-row > :nth-child(6) { display: none; }
+@media (min-width: 540px) {
+  .shop-row {
+    grid-template-columns: 28px 1fr 80px 80px 80px;
+    gap: 8px;
+    padding: 8px 14px;
+  }
+  .shop-row > :nth-child(6) { display: block; }
+}
+@media (min-width: 760px) {
+  .shop-row {
+    grid-template-columns: 28px 1fr 90px 90px 90px 90px;
+  }
+  .shop-row .col-pkg { display: block; }
 }
 .shop-row:last-child { border-bottom: none; }
 .shop-row input {
@@ -567,11 +591,14 @@ aside[id="sidebar"] {
   }
   .meal-item-row .col-fats,
   .meal-item-row .col-price { display: none; }
-  .shop-row {
-    grid-template-columns: 28px 1fr 80px 70px;
-  }
-  .shop-row .col-pkg { display: none; }
 }
 @media (min-width: 769px) {
   .sidebar-mobile-overlay { display: none !important; }
+}
+
+/* ── MOBILE GLOBAL OVERFLOW GUARD ────────────────────────────── */
+@media (max-width: 920px) {
+  body { overflow-x: hidden; }
+  /* Reduce main content padding on mobile */
+  main > * { min-width: 0; }
 }
