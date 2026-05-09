@@ -41,11 +41,33 @@
         width: 100%;
         text-align: center;
       }
-      @media (max-width: 768px) {
+      /* transparent wrapper on desktop — children flow into the parent grid */
+      .item-stats-row { display: contents; }
+      @media (max-width: 920px) {
+        .meal-header-row { display: none !important; }
         .meal-item-grid {
-          grid-template-columns: 18px 1fr 80px 60px 60px 32px;
+          grid-template-columns: 20px 1fr 32px;
+          grid-template-rows: auto auto;
+          row-gap: 4px;
+          padding: 10px 16px;
         }
-        .col-cost, .col-cost5, .col-cost6 { display: none; }
+        /* drag spans both rows */
+        .meal-item-grid > :nth-child(1) { grid-column: 1; grid-row: 1 / 3; align-self: center; }
+        /* food input row 1 */
+        .meal-item-grid > :nth-child(2) { grid-column: 2; grid-row: 1; }
+        /* stats row — becomes a real flex row */
+        .meal-item-grid > .item-stats-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px 10px;
+          align-items: center;
+          grid-column: 2;
+          grid-row: 2;
+        }
+        .item-stats-row input { width: 60px; }
+        /* remove button spans both rows */
+        .meal-item-grid > :nth-child(4) { grid-column: 3; grid-row: 1 / 3; align-self: center; }
+        .col-cost5, .col-cost6 { display: none; }
       }
       .drag-over { outline: 2px dashed var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
       .drag-handle { cursor: grab; color: var(--text3); display: flex; align-items: center; }
@@ -472,7 +494,7 @@
                           </div>
 
                             <!-- Column header for items -->
-                          <div class="meal-item-grid" style="background:var(--surface2);padding-top:6px;padding-bottom:6px">
+                          <div class="meal-item-grid meal-header-row" style="background:var(--surface2);padding-top:6px;padding-bottom:6px">
                             <span></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600" x-text="$store.planner.t('col_food')"></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_qty')"></span>
@@ -519,6 +541,8 @@
                                 </div>
                               </div>
 
+                              <!-- Quantity / Calories / Protein / Cost (wrapped for mobile row layout) -->
+                              <div class="item-stats-row">
                               <!-- Quantity -->
                               <input type="number" x-model.number="item.quantity"
                                 @input="$store.planner.debouncedSave()"
@@ -538,6 +562,7 @@
 
                               <!-- Computed: Cost ×6 -->
                               <span class="col-cost6" style="text-align:center;color:var(--text3);font-size:0.8rem" x-text="$store.planner.itemCalc(item).cost != null ? ($store.planner.itemCalc(item).cost * 6).toFixed(2) + ' €' : '—'"></span>
+                              </div>
 
                               <!-- Remove item -->
                               <button class="btn-icon" style="width:26px;height:26px;color:var(--danger)" title="Remove"
@@ -588,6 +613,7 @@
                       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
                         <!-- Header -->
                         <div class="shop-row" style="background:var(--surface2)">
+                          <span></span>
                           <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600" x-text="$store.planner.t('col_food')"></span>
                           <span class="col-pkg" style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('shop_col_pkg')"></span>
                           <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('shop_col_need')"></span>
@@ -596,9 +622,15 @@
                         </div>
 
                         <template x-for="entry in $store.planner.shoppingList" :key="entry.foodId">
-                          <div class="shop-row">
+                          <div class="shop-row" :class="{ 'shop-checked': $store.planner.shopChecked[entry.foodId] }">
+                            <div style="display:flex;align-items:center;justify-content:center">
+                              <input type="checkbox"
+                                :checked="$store.planner.shopChecked[entry.foodId]"
+                                @change="$store.planner.shopChecked = { ...$store.planner.shopChecked, [entry.foodId]: $event.target.checked }"
+                                style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0" />
+                            </div>
                             <div>
-                              <div style="font-size:0.875rem;font-weight:500" x-text="entry.name"></div>
+                              <div class="shop-name" style="font-size:0.875rem;font-weight:500" x-text="entry.name"></div>
                               <div style="font-size:0.72rem;color:var(--text3)" x-text="entry.priceInfo"></div>
                             </div>
                             <div class="col-pkg" style="text-align:center;color:var(--text2);font-size:0.85rem" x-text="entry.packageWeight ? entry.packageWeight + 'g' : '—'"></div>
@@ -676,7 +708,7 @@
     <style>
       #sidebar { flex-shrink:0; width:0; overflow:hidden; transition: width 0.25s ease; }
       #sidebar.open { width: 280px; }
-      @media (max-width: 700px) {
+      @media (max-width: 920px) {
         #topbar > *:nth-child(n + 3) { display: none !important; }
         #sidebar { position:fixed; top:0; left:0; height:100vh; z-index:200; box-shadow:none; transition: width 0.25s ease, box-shadow 0.25s ease; }
         #sidebar.open { width: min(300px, 85vw); box-shadow: 4px 0 32px rgba(0,0,0,0.6); }
@@ -684,7 +716,7 @@
         #sidebar.open ~ #sidebar-overlay, body:has(#sidebar.open) #sidebar-overlay { display:block; }
         .sidebar-mobile-header { display: flex !important; }
       }
-      @media (min-width: 701px) { .sidebar-mobile-header { display: none !important; } }
+      @media (min-width: 921px) { .sidebar-mobile-header { display: none !important; } }
     </style>
     <script type="module">
       import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/module.esm.js";
@@ -722,10 +754,11 @@
         activePlanId: null,
 
         // ── UI ────────────────────────────────────────────────
-        sidebarOpen: window.innerWidth >= 769,
+        sidebarOpen: window.innerWidth >= 921,
         tab: "meals",          // meals | shopping | costs
         shopDays: 5,
         shopOverrides: {},     // foodId → overrideGrams
+        shopChecked: {},       // foodId → boolean (in cart)
         saving: false,
         modal: null,
         deletingPlanId: null,

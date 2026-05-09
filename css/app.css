@@ -497,12 +497,13 @@ input[type="checkbox"] {
 /* ── SHOPPING LIST ───────────────────────────────────────────── */
 .shop-row {
   display: grid;
-  grid-template-columns: 1fr 90px 90px 90px;
+  grid-template-columns: 28px 1fr 90px 90px 90px 90px;
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
   border-bottom: 1px solid var(--border);
   font-size: 0.875rem;
+  transition: background 0.15s, opacity 0.15s;
 }
 .shop-row:last-child { border-bottom: none; }
 .shop-row input {
@@ -510,6 +511,14 @@ input[type="checkbox"] {
   text-align: center;
   padding: 4px 8px;
   font-size: 0.8rem;
+}
+.shop-row.shop-checked {
+  background: rgba(34, 197, 94, 0.06);
+  opacity: 0.55;
+}
+.shop-row.shop-checked .shop-name {
+  text-decoration: line-through;
+  color: var(--text3);
 }
 
 /* ── SAVE INDICATOR ──────────────────────────────────────────── */
@@ -559,7 +568,7 @@ aside[id="sidebar"] {
   .meal-item-row .col-fats,
   .meal-item-row .col-price { display: none; }
   .shop-row {
-    grid-template-columns: 1fr 80px 70px;
+    grid-template-columns: 28px 1fr 80px 70px;
   }
   .shop-row .col-pkg { display: none; }
 }
