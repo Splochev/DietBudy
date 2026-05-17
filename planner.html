@@ -514,6 +514,7 @@
                       <!-- Meals list -->
                       <template x-for="(meal, mealIdx) in $store.planner.activePlan.meals" :key="mealIdx">
                         <div class="meal-card" style="margin-bottom:14px"
+                          x-data="{ notesOpen: false, notesDraft: '' }"
                           draggable="true"
                           @dragstart="$store.planner.dragType = 'meal'; $store.planner.dragMealIdx = mealIdx; $event.dataTransfer.effectAllowed = 'move'"
                           @dragend="$store.planner.dragType = null"
@@ -537,10 +538,28 @@
                               <span><span x-text="$store.planner.mealTotals(mealIdx).calories"></span> kcal</span>
                               <span style="color:var(--accent)"><span x-text="$store.planner.mealTotals(mealIdx).protein"></span>g P</span>
                             </div>
+                            <!-- Notes toggle button -->
+                            <button class="btn-icon" :style="meal.notes ? 'color:var(--accent);width:26px;height:26px;flex-shrink:0' : 'color:var(--text3);width:26px;height:26px;flex-shrink:0'" title="Meal notes"
+                              @click="notesOpen = !notesOpen; if (notesOpen) notesDraft = meal.notes || ''">
+                              <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            </button>
                             <button class="btn-icon" style="color:var(--danger);width:26px;height:26px;flex-shrink:0" title="Remove meal"
                               @click="$store.planner.removeMeal(mealIdx)">
                               <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                             </button>
+                          </div>
+
+                          <!-- Notes panel -->
+                          <div x-show="notesOpen" x-transition style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2)">
+                            <textarea x-model="notesDraft" rows="3"
+                              style="width:100%;resize:vertical;font-size:0.83rem;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);line-height:1.5"
+                              placeholder="Add notes for this meal…"></textarea>
+                            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+                              <button class="btn btn-secondary" style="font-size:0.78rem;padding:4px 12px"
+                                @click="notesOpen = false; notesDraft = ''">Cancel</button>
+                              <button class="btn btn-primary" style="font-size:0.78rem;padding:4px 12px"
+                                @click="meal.notes = notesDraft; notesOpen = false; $store.planner.debouncedSave()">Save</button>
+                            </div>
                           </div>
 
                             <!-- Column header for items -->
