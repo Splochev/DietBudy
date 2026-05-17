@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin – Food Database Merger</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./css/app.css" />
+  </head>
+  <body>
+    <div x-data="adminApp" x-init="init()" style="display:flex;flex-direction:column;min-height:100vh;background:var(--bg)">
+
+      <!-- ══ LOADING ══════════════════════════════════════════════ -->
+      <template x-if="authState === 'loading'">
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg)">
+          <div style="text-align:center;color:var(--text3)">
+            <svg style="width:40px;height:40px;color:var(--accent);animation:pulse 1.5s infinite;margin-bottom:12px"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="6" y1="2" x2="6" y2="9"/>
+              <line x1="9" y1="2" x2="9" y2="9"/>
+              <path d="M6 9 Q7.5 12 9 9"/>
+              <line x1="7.5" y1="12" x2="7.5" y2="22"/>
+              <ellipse cx="16.5" cy="6" rx="2.5" ry="4"/>
+              <line x1="16.5" y1="10" x2="16.5" y2="22"/>
+            </svg>
+            <p style="font-size:0.9rem">Loading…</p>
+          </div>
+        </div>
+      </template>
+
+      <!-- ══ ADMIN TOOL ════════════════════════════════════════════ -->
+      <template x-if="authState === 'authenticated'">
+        <div style="max-width:1200px;width:100%;margin:0 auto;padding:24px">
+          
+          <!-- Header -->
+          <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:2px solid var(--border)">
+            <div>
+              <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:4px;color:var(--accent)">
+                🔧 Admin – Food Database Merger
+              </h1>
+              <p style="color:var(--text3);font-size:0.9rem">
+                Select a source user's food database and merge it into a target user's database
+              </p>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:0.85rem;color:var(--text3)" x-text="user?.email"></span>
+              <button class="btn btn-secondary btn-sm" @click="logout()">Sign Out</button>
+            </div>
+          </header>
+
+          <!-- Warning Banner -->
+          <div style="background:var(--danger);color:white;padding:12px 16px;border-radius:var(--radius);margin-bottom:24px;display:flex;align-items:center;gap:12px">
+            <svg style="width:20px;height:20px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>
+              <strong>Admin Tool – Use with Caution!</strong>
+              <p style="font-size:0.85rem;margin-top:4px;opacity:0.9">
+                This tool merges food databases between users. Changes are permanent and cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          <!-- Users List -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px">
+            <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+              <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                <path d="M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+              All Users
+              <span x-show="loading" style="font-size:0.8rem;color:var(--text3);font-weight:400">(Loading...)</span>
+            </h2>
+            
+            <div x-show="!loading && users.length === 0" style="text-align:center;padding:32px;color:var(--text3)">
+              <p>No users found in the database</p>
+            </div>
+
+            <div x-show="users.length > 0" style="display:grid;gap:12px">
+              <template x-for="u in users" :key="u.uid">
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;justify-content:space-between">
+                  <div style="flex:1">
+                    <div style="font-weight:600;margin-bottom:4px" x-text="u.email"></div>
+                    <div style="font-size:0.8rem;color:var(--text3)">
+                      <span x-text="u.foodCount"></span> foods
+                      <span style="margin:0 8px">•</span>
+                      <span x-text="u.planCount"></span> meal plans
+                      <span style="margin:0 8px">•</span>
+                      <span style="font-family:monospace;font-size:0.75rem" x-text="u.uid"></span>
+                    </div>
+                  </div>
+                  <button 
+                    class="btn btn-sm"
+                    :class="selectedSourceUid === u.uid ? 'btn-primary' : 'btn-secondary'"
+                    @click="selectSource(u.uid)"
+                    x-text="selectedSourceUid === u.uid ? '✓ Selected as Source' : 'Select as Source'">
+                  </button>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Merge Section -->
+          <div x-show="selectedSourceUid" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+            <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+              <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                <polyline points="7.5 4.21 12 6.81 16.5 4.21"/>
+                <polyline points="7.5 19.79 7.5 14.6 3 12"/>
+                <polyline points="21 12 16.5 14.6 16.5 19.79"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+              Merge Food Database
+            </h2>
+
+            <!-- Source Info -->
+            <div style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
+              <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:6px;font-weight:600">
+                Source User
+              </div>
+              <div style="font-weight:600;margin-bottom:4px" x-text="sourceUser?.email"></div>
+              <div style="font-size:0.85rem;color:var(--text2)">
+                <span x-text="sourceUser?.foodCount"></span> foods will be copied
+              </div>
+            </div>
+
+            <!-- Target Selection -->
+            <div style="margin-bottom:20px">
+              <label class="form-label" style="margin-bottom:8px">Select Target User</label>
+              <select x-model="selectedTargetUid" style="width:100%">
+                <option value="">-- Choose a user to merge into --</option>
+                <template x-for="u in users.filter(x => x.uid !== selectedSourceUid)" :key="u.uid">
+                  <option :value="u.uid" x-text="`${u.email} (${u.foodCount} foods)`"></option>
+                </template>
+              </select>
+            </div>
+
+            <!-- Preview -->
+            <div x-show="selectedTargetUid && sourceFoods.length > 0" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:20px">
+              <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px;font-weight:600">
+                Preview: Foods to be Merged
+              </div>
+              <div style="max-height:300px;overflow-y:auto">
+                <template x-for="food in sourceFoods" :key="food.id">
+                  <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:0.85rem">
+                    <span style="font-weight:500" x-text="food.name"></span>
+                    <span style="color:var(--text3);margin-left:8px">
+                      (<span x-text="food.calories"></span> kcal, 
+                      <span x-text="food.protein"></span>g protein)
+                    </span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Merge Options -->
+            <div x-show="selectedTargetUid" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:20px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" x-model="skipDuplicates" style="width:16px;height:16px">
+                <span style="font-size:0.9rem">Skip duplicate food names (recommended)</span>
+              </label>
+              <p style="font-size:0.8rem;color:var(--text3);margin-top:6px;margin-left:24px">
+                If enabled, foods with the same name as existing foods in the target database will be skipped.
+              </p>
+            </div>
+
+            <!-- Error Display -->
+            <div x-show="error" class="error-box" style="margin-bottom:16px" x-text="error"></div>
+
+            <!-- Success Display -->
+            <div x-show="mergeResult" style="background:var(--success-bg);border:1px solid var(--success);color:var(--success);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
+              <div style="font-weight:600;margin-bottom:4px">✓ Merge Completed Successfully!</div>
+              <div style="font-size:0.85rem;opacity:0.9" x-text="mergeResult"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex;gap:12px;justify-content:flex-end">
+              <button 
+                class="btn btn-secondary" 
+                @click="resetSelection()"
+                :disabled="merging">
+                Reset
+              </button>
+              <button 
+                class="btn btn-primary" 
+                @click="performMerge()"
+                :disabled="!selectedTargetUid || merging || sourceFoods.length === 0">
+                <span x-show="!merging">
+                  <svg style="width:14px;height:14px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                  </svg>
+                  Merge Food Databases
+                </span>
+                <span x-show="merging">Merging...</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </template>
+    </div>
+
+    <style>
+      .error-box {
+        background: var(--danger-bg);
+        border: 1px solid var(--danger);
+        color: var(--danger);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+    </style>
+
+    <script type="module">
+      import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/module.esm.js";
+      import { auth, db } from "./js/firebase.js";
+      import {
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+      import {
+        collection,
+        collectionGroup,
+        getDocs,
+        getDoc,
+        doc,
+        addDoc,
+        setDoc,
+        query,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+      Alpine.data("adminApp", () => ({
+        // Auth
+        authState: "loading",
+        user: null,
+
+        // Data
+        users: [],
+        loading: false,
+        selectedSourceUid: null,
+        selectedTargetUid: null,
+        sourceFoods: [],
+        skipDuplicates: true,
+
+        // UI
+        merging: false,
+        error: "",
+        mergeResult: "",
+
+        // Computed
+        get sourceUser() {
+          return this.users.find(u => u.uid === this.selectedSourceUid);
+        },
+
+        get targetUser() {
+          return this.users.find(u => u.uid === this.selectedTargetUid);
+        },
+
+        // Init
+        async init() {
+          onAuthStateChanged(auth, async (user) => {
+            if (user) {
+              this.user = user;
+              this.authState = "authenticated";
+              // Save email to user doc so admin can display it
+              try {
+                await setDoc(doc(db, `users/${user.uid}`), { email: user.email }, { merge: true });
+              } catch (e) { /* non-critical */ }
+              await this.loadUsers();
+            } else {
+              window.location.href = "./index.html";
+            }
+          });
+        },
+
+        // Load all users from Firestore
+        async loadUsers() {
+          this.loading = true;
+          this.error = "";
+          try {
+            const userMap = new Map();
+
+            // 1. List users collection directly (populated by saveUserProfile on login)
+            try {
+              const usersSnap = await getDocs(collection(db, "users"));
+              for (const userDoc of usersSnap.docs) {
+                const data = userDoc.data();
+                userMap.set(userDoc.id, { uid: userDoc.id, foodCount: 0, planCount: 0, email: data.email || null });
+              }
+            } catch (e) { /* fallback to collectionGroup below */ }
+
+            // 2. collectionGroup on foods to count foods and catch users not in /users collection
+            const foodsSnap = await getDocs(collectionGroup(db, "foods"));
+            for (const foodDoc of foodsSnap.docs) {
+              const uid = foodDoc.ref.parent.parent.id;
+              if (!uid) continue;
+              if (!userMap.has(uid)) {
+                userMap.set(uid, { uid, foodCount: 0, planCount: 0, email: null });
+              }
+              userMap.get(uid).foodCount++;
+            }
+
+            // 3. collectionGroup on mealPlans to catch users without foods
+            const plansSnap = await getDocs(collectionGroup(db, "mealPlans"));
+            for (const planDoc of plansSnap.docs) {
+              const uid = planDoc.ref.parent.parent.id;
+              if (!uid) continue;
+              if (!userMap.has(uid)) {
+                userMap.set(uid, { uid, foodCount: 0, planCount: 0, email: null });
+              }
+              userMap.get(uid).planCount++;
+            }
+
+            // 4. Fill any missing emails from user docs
+            await Promise.all(Array.from(userMap.values()).filter(u => !u.email).map(async u => {
+              try {
+                const snap = await getDoc(doc(db, `users/${u.uid}`));
+                if (snap.exists()) u.email = snap.data()?.email || null;
+              } catch (e) { /* no user doc */ }
+            }));
+
+            this.users = Array.from(userMap.values())
+              .map(u => ({ ...u, email: u.email || `uid:${u.uid.slice(0, 12)}…` }))
+              .sort((a, b) => a.email.localeCompare(b.email));
+
+            if (this.users.length === 0) {
+              this.error = "No users found. Make sure the Firestore rules have been updated with admin access.";
+            }
+          } catch (e) {
+            this.error = "Failed to load users: " + e.message +
+              " — Make sure you have deployed the updated Firestore rules granting admin access.";
+            console.error(e);
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        // Select source user
+        async selectSource(uid) {
+          this.selectedSourceUid = uid;
+          this.selectedTargetUid = null;
+          this.error = "";
+          this.mergeResult = "";
+          
+          // Load source foods
+          try {
+            const foodsSnap = await getDocs(collection(db, `users/${uid}/foods`));
+            this.sourceFoods = foodsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          } catch (e) {
+            this.error = "Failed to load source foods: " + e.message;
+            this.sourceFoods = [];
+          }
+        },
+
+        // Reset selection
+        resetSelection() {
+          this.selectedSourceUid = null;
+          this.selectedTargetUid = null;
+          this.sourceFoods = [];
+          this.error = "";
+          this.mergeResult = "";
+        },
+
+        // Perform the merge
+        async performMerge() {
+          if (!this.selectedSourceUid || !this.selectedTargetUid) {
+            this.error = "Please select both source and target users.";
+            return;
+          }
+
+          if (this.sourceFoods.length === 0) {
+            this.error = "Source user has no foods to merge.";
+            return;
+          }
+
+          const confirmed = confirm(
+            `Are you sure you want to merge ${this.sourceFoods.length} foods from ${this.sourceUser.email} into ${this.targetUser.email}?\n\n` +
+            `This action cannot be undone!`
+          );
+
+          if (!confirmed) return;
+
+          this.merging = true;
+          this.error = "";
+          this.mergeResult = "";
+
+          try {
+            // Load target foods if skip duplicates is enabled
+            let targetFoodNames = new Set();
+            if (this.skipDuplicates) {
+              const targetFoodsSnap = await getDocs(collection(db, `users/${this.selectedTargetUid}/foods`));
+              targetFoodNames = new Set(targetFoodsSnap.docs.map(d => d.data().name.toLowerCase().trim()));
+            }
+
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            // Add each food to target user
+            for (const food of this.sourceFoods) {
+              // Check for duplicate
+              if (this.skipDuplicates && targetFoodNames.has(food.name.toLowerCase().trim())) {
+                skippedCount++;
+                continue;
+              }
+
+              // Create new food in target user's database
+              const payload = {
+                userId: this.selectedTargetUid,
+                name: food.name,
+                calories: Number(food.calories) || 0,
+                protein: Number(food.protein) || 0,
+                fats: Number(food.fats) || 0,
+                carbs: Number(food.carbs) || 0,
+                packageWeight: Number(food.packageWeight) || 0,
+                price: Number(food.price) || 0,
+                priceType: food.priceType || "per_package",
+                flagged: food.flagged || false,
+                createdAt: serverTimestamp(),
+              };
+
+              await addDoc(collection(db, `users/${this.selectedTargetUid}/foods`), payload);
+              addedCount++;
+            }
+
+            this.mergeResult = `Successfully merged ${addedCount} food(s) from ${this.sourceUser.email} to ${this.targetUser.email}.` +
+              (skippedCount > 0 ? ` ${skippedCount} duplicate(s) were skipped.` : "");
+
+            // Reload users to update counts
+            await this.loadUsers();
+
+          } catch (e) {
+            this.error = "Merge failed: " + e.message;
+            console.error(e);
+          } finally {
+            this.merging = false;
+          }
+        },
+
+        // Logout
+        async logout() {
+          await signOut(auth);
+        },
+      }));
+
+      Alpine.start();
+    </script>
+  </body>
+</html>
