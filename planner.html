@@ -879,6 +879,7 @@
             if (user) {
               this.user = user;
               this.authState = "authenticated";
+              DB.saveUserProfile(user.uid, user.email).catch(() => {});
               await this.loadData();
               // Auto-load plan from URL param, then last-used plan in Firestore
               const params = new URLSearchParams(window.location.search);

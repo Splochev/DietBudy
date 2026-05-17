@@ -23,6 +23,12 @@ import {
 const col  = (...segs) => collection(db, segs.join("/"));
 const docR = (...segs) => doc(db, segs.join("/"));
 
+// ─── USER PROFILE ─────────────────────────────────────────────
+// Call on every login so the admin tool can discover all users.
+export async function saveUserProfile(uid, email) {
+  await setDoc(docR(`users/${uid}`), { email, uid }, { merge: true });
+}
+
 // ─── FOODS ────────────────────────────────────────────────────
 // Food shape:
 //   { id, userId, name, calories, protein, fats?, carbs?,
