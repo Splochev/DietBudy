@@ -1,0 +1,1269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DietBuddy – Weight Tracker</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./css/app.css" />
+    <style>
+      /* ── WEIGHT TRACKER SPECIFIC ───────────────────────────── */
+      .wt-section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 18px;
+      }
+      .wt-section-title {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text3);
+        font-weight: 600;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .wt-section-title svg { opacity: 0.6; }
+
+      /* Metric cards */
+      .metric-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 110px;
+      }
+      .metric-card .mc-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text3);
+        font-weight: 600;
+      }
+      .metric-card .mc-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1;
+      }
+      .metric-card .mc-sub {
+        font-size: 0.75rem;
+        color: var(--text3);
+      }
+      .metric-card.accent { border-color: var(--accent); background: var(--accent-bg); }
+      .metric-card.accent .mc-value { color: var(--accent); }
+      .metric-card.warn { border-color: var(--warning); background: rgba(245,158,11,0.08); }
+      .metric-card.warn .mc-value { color: var(--warning); }
+      .metric-card.danger { border-color: var(--danger); background: rgba(239,68,68,0.08); }
+      .metric-card.danger .mc-value { color: var(--danger); }
+
+      /* Compare chips */
+      .cmp-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+      }
+      .cmp-title {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text3);
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .cmp-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      .cmp-row .cmp-label { font-size: 0.78rem; color: var(--text3); }
+      .cmp-row .cmp-val   { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+      .cmp-change {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 99px;
+        margin-top: 4px;
+      }
+      .cmp-change.good { background: var(--accent-bg); color: var(--accent); }
+      .cmp-change.bad  { background: rgba(239,68,68,0.1); color: var(--danger); }
+      .cmp-change.neutral { background: var(--surface3); color: var(--text3); }
+
+      /* Chart container */
+      .chart-wrap {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        width: 100%;
+      }
+      .chart-wrap svg { display: block; width: 100%; height: auto; }
+
+      /* History table */
+      .wt-history-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 36px;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+        transition: background 0.15s;
+      }
+      .wt-history-row:last-child { border-bottom: none; }
+      .wt-history-row:hover { background: var(--surface2); }
+      .wt-history-row.header { background: var(--surface2); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); font-weight: 600; }
+
+      /* Sidebar entries */
+      .sb-entry {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 0.82rem;
+        gap: 8px;
+        cursor: default;
+        transition: background 0.15s;
+      }
+      .sb-entry:hover { background: var(--surface2); }
+      .sb-entry .sb-date { color: var(--text3); font-size: 0.75rem; }
+      .sb-entry .sb-wt { font-weight: 700; color: var(--text); }
+      .sb-entry .sb-delta { font-size: 0.72rem; font-weight: 600; }
+      .sb-entry .sb-delta.pos { color: var(--danger); }
+      .sb-entry .sb-delta.neg { color: var(--accent); }
+
+      /* Trend arrow */
+      .trend-arrow { display: inline-flex; align-items: center; gap: 3px; }
+      .trend-arrow.up   { color: var(--danger); }
+      .trend-arrow.down { color: var(--accent); }
+      .trend-arrow.flat { color: var(--text3); }
+
+      /* Responsive grid */
+      .metrics-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+      .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+      .forms-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+      @media (max-width: 700px) {
+        .compare-grid { grid-template-columns: 1fr; }
+        .forms-grid   { grid-template-columns: 1fr; }
+        .metric-card  { min-width: 80px; }
+      }
+
+      /* Sidebar layout (mirrors planner.html) */
+      #sidebar { flex-shrink:0; width:0; overflow:hidden; transition: width 0.25s ease; }
+      #sidebar.open { width: 260px; }
+      @media (max-width: 920px) {
+        .topbar-nav { display: none !important; }
+        #topbar > *:nth-child(n+5) { display: none !important; }
+        #sidebar { position:fixed; top:0; left:0; height:100vh; z-index:200; }
+        #sidebar.open { width: min(300px, 85vw); box-shadow: 4px 0 32px rgba(0,0,0,0.6); }
+        #sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:199; }
+        #sidebar.open ~ #sidebar-overlay { display:block; }
+        .sidebar-mobile-header { display: flex !important; }
+      }
+      @media (min-width: 921px) { .sidebar-mobile-header { display: none !important; } }
+    </style>
+  </head>
+  <body>
+    <div x-data x-init="$store.wt.init()" style="display:flex;flex-direction:column;height:100vh">
+
+      <!-- ══ AUTH SCREEN ══════════════════════════════════════════ -->
+      <template x-if="$store.wt.authState === 'unauthenticated'">
+        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg)">
+          <div style="width:100%;max-width:480px">
+            <div class="auth-card">
+              <div class="auth-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
+                <span>DietBuddy</span>
+              </div>
+              <div x-show="$store.wt.authError" class="error-box" x-text="$store.wt.authError"></div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" x-model="$store.wt.authEmail" @keyup.enter="$store.wt.login()" placeholder="you@example.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" x-model="$store.wt.authPassword" @keyup.enter="$store.wt.login()" placeholder="••••••••" />
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px 16px"
+                @click="$store.wt.login()" :disabled="$store.wt.authLoading">
+                <span x-show="!$store.wt.authLoading">Sign In</span>
+                <span x-show="$store.wt.authLoading">Signing in…</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- ══ LOADING ══════════════════════════════════════════════ -->
+      <template x-if="$store.wt.authState === 'loading'">
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg)">
+          <div style="text-align:center;color:var(--text3)">
+            <svg style="width:40px;height:40px;color:var(--accent);animation:pulse 1.5s infinite;margin-bottom:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/>
+            </svg>
+            <p style="font-size:0.9rem">Loading…</p>
+          </div>
+        </div>
+      </template>
+
+      <!-- ══ APP SHELL ═════════════════════════════════════════════ -->
+      <template x-if="$store.wt.authState === 'authenticated'">
+        <div style="display:flex;flex-direction:column;height:100vh">
+
+          <!-- ═ TOP BAR ═══════════════════════════════════════════ -->
+          <header id="topbar" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden">
+            <button class="btn-icon" @click="$store.wt.sidebarOpen = !$store.wt.sidebarOpen" title="Toggle sidebar">
+              <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+
+            <div style="display:flex;align-items:center;gap:8px;font-size:1.15rem;font-weight:700;color:var(--accent);letter-spacing:-0.5px;flex-shrink:0">
+              <svg style="width:24px;height:24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
+              DietBuddy
+            </div>
+
+            <nav class="topbar-nav" style="display:flex;gap:4px;margin-left:8px">
+              <!-- Foods -->
+              <a href="./food-manager.html" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)" onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
+                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
+                Foods
+              </a>
+              <!-- Planner -->
+              <a href="./planner.html" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)" onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
+                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+                Planner
+              </a>
+              <!-- Weight Tracker — ACTIVE -->
+              <a href="./weight-tracker.html" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--accent);background:var(--accent-bg);text-decoration:none">
+                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>
+                Weight
+              </a>
+              <!-- Workouts -->
+              <a href="https://splochev.github.io/GymBudy/workout.html" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)" onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
+                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Workouts
+              </a>
+              <!-- Budget -->
+              <a href="https://splochev.github.io/budgetBuddy/budget.html" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)" onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'" onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
+                <svg style="width:14px;height:14px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
+                Budget
+              </a>
+            </nav>
+
+            <div style="flex:1"></div>
+
+            <!-- Save indicator -->
+            <div x-show="$store.wt.saving" style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text3)">
+              <div class="save-dot dot-saving"></div>
+              <span>Saving…</span>
+            </div>
+
+            <!-- User + logout -->
+            <span style="font-size:0.8rem;color:var(--text3)" x-text="$store.wt.user?.displayName || $store.wt.user?.email?.split('@')[0]"></span>
+            <button class="btn-icon" @click="$store.wt.logout()" title="Sign out">
+              <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+          </header>
+
+          <!-- ═ BODY ════════════════════════════════════════════════ -->
+          <div style="display:flex;flex:1;overflow:hidden;position:relative">
+
+            <!-- ═ SIDEBAR ════════════════════════════════════════ -->
+            <aside id="sidebar" :class="{ open: $store.wt.sidebarOpen }"
+              style="background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+
+              <!-- Mobile header -->
+              <div class="sidebar-mobile-header" style="display:none;flex-direction:column;flex-shrink:0">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:1.1rem;font-weight:700;color:var(--accent)">
+                    <svg style="width:22px;height:22px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
+                    DietBuddy
+                  </div>
+                  <button class="btn-icon" @click="$store.wt.sidebarOpen = false">
+                    <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+                <!-- Mobile nav links -->
+                <div style="display:flex;flex-direction:column;padding:8px;border-bottom:1px solid var(--border);gap:2px">
+                  <a href="./food-manager.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
+                    Foods
+                  </a>
+                  <a href="./planner.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+                    Planner
+                  </a>
+                  <a href="./weight-tracker.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);font-size:0.875rem;font-weight:600;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>
+                    Weight Tracker
+                  </a>
+                  <a href="https://splochev.github.io/GymBudy/workout.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    Workouts
+                  </a>
+                  <a href="https://splochev.github.io/budgetBuddy/budget.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
+                    Budget
+                  </a>
+                </div>
+              </div>
+
+              <!-- Sidebar content: progress summary + recent entries -->
+              <div style="padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0">
+                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:12px">Progress</div>
+
+                <!-- Current / Target -->
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+                  <span style="font-size:0.78rem;color:var(--text3)">Current</span>
+                  <span style="font-weight:700;color:var(--text)" x-text="$store.wt.currentWeight != null ? $store.wt.currentWeight + ' ' + $store.wt.unit : '—'"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+                  <span style="font-size:0.78rem;color:var(--text3)">Target</span>
+                  <span style="font-weight:700;color:var(--accent)" x-text="$store.wt.targetWeight != null ? $store.wt.targetWeight + ' ' + $store.wt.unit : '—'"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+                  <span style="font-size:0.78rem;color:var(--text3)">To go</span>
+                  <span style="font-weight:700;" :style="$store.wt.toGo > 0 ? 'color:var(--warning)' : 'color:var(--accent)'"
+                    x-text="$store.wt.toGo != null ? ($store.wt.toGo > 0 ? '-' : '+') + Math.abs($store.wt.toGo).toFixed(1) + ' ' + $store.wt.unit : '—'"></span>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="progress-bar" style="margin-bottom:6px" x-show="$store.wt.progressPct != null">
+                  <div class="progress-fill" :class="$store.wt.progressPct >= 100 ? 'good' : $store.wt.progressPct >= 50 ? 'good' : 'warn'"
+                    :style="'width:' + Math.min(Math.max($store.wt.progressPct || 0, 0), 100) + '%'"></div>
+                </div>
+                <div style="font-size:0.72rem;color:var(--text3);text-align:right" x-show="$store.wt.progressPct != null"
+                  x-text="Math.min(Math.max($store.wt.progressPct || 0, 0), 100).toFixed(1) + '% complete'"></div>
+              </div>
+
+              <!-- Recent entries -->
+              <div style="padding:12px 16px;flex:1;overflow-y:auto">
+                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:600;margin-bottom:8px">Recent Entries</div>
+                <div style="display:flex;flex-direction:column;gap:1px">
+                  <template x-for="(entry, i) in $store.wt.recentEntries" :key="entry.date">
+                    <div class="sb-entry">
+                      <span class="sb-date" x-text="$store.wt.formatDateShort(entry.date)"></span>
+                      <span class="sb-wt" x-text="entry.weight + ' ' + $store.wt.unit"></span>
+                      <span class="sb-delta" :class="$store.wt.entryDelta(i) > 0 ? 'pos' : $store.wt.entryDelta(i) < 0 ? 'neg' : ''"
+                        x-text="$store.wt.entryDelta(i) !== null ? ($store.wt.entryDelta(i) > 0 ? '+' : '') + $store.wt.entryDelta(i).toFixed(1) : ''"></span>
+                    </div>
+                  </template>
+                  <div x-show="!$store.wt.entries.length" style="font-size:0.8rem;color:var(--text3);padding:8px 4px">No entries yet</div>
+                </div>
+              </div>
+
+              <!-- Mobile user footer -->
+              <div class="sidebar-mobile-header" style="display:none;flex-direction:column;flex-shrink:0;border-top:1px solid var(--border);padding:12px 16px;gap:6px">
+                <span style="font-size:0.78rem;color:var(--text3)" x-text="$store.wt.user?.displayName || $store.wt.user?.email?.split('@')[0]"></span>
+                <button class="btn-icon" @click="$store.wt.logout()" title="Sign out">
+                  <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+              </div>
+            </aside>
+
+            <!-- Mobile overlay -->
+            <div id="sidebar-overlay" @click="$store.wt.sidebarOpen = false"></div>
+
+            <!-- ═ MAIN CONTENT ════════════════════════════════════ -->
+            <main style="flex:1;overflow:auto;min-width:0">
+              <div style="padding:clamp(12px,3vw,24px)">
+
+                <!-- ── TOP METRIC CARDS ─────────────────────── -->
+                <div class="metrics-grid">
+                  <!-- Current Weight -->
+                  <div class="metric-card" :class="$store.wt.currentWeight != null ? 'accent' : ''">
+                    <span class="mc-label">Current Weight</span>
+                    <span class="mc-value" x-text="$store.wt.currentWeight != null ? $store.wt.currentWeight : '—'"></span>
+                    <span class="mc-sub" x-text="$store.wt.currentWeight != null ? $store.wt.unit + ' · ' + $store.wt.formatDateShort($store.wt.lastEntryDate) : 'No entries yet'"></span>
+                  </div>
+                  <!-- Target Weight -->
+                  <div class="metric-card">
+                    <span class="mc-label">Target Weight</span>
+                    <span class="mc-value" x-text="$store.wt.targetWeight != null ? $store.wt.targetWeight : '—'"></span>
+                    <span class="mc-sub" x-text="$store.wt.targetWeight != null ? $store.wt.unit : 'Not set'"></span>
+                  </div>
+                  <!-- To Go -->
+                  <div class="metric-card" :class="$store.wt.toGo == null ? '' : $store.wt.toGo <= 0 ? 'accent' : 'warn'">
+                    <span class="mc-label">To Goal</span>
+                    <span class="mc-value" x-text="$store.wt.toGo != null ? ($store.wt.toGo > 0 ? $store.wt.toGo.toFixed(1) : '0.0') : '—'"></span>
+                    <span class="mc-sub" x-text="$store.wt.toGo != null ? ($store.wt.toGo <= 0 ? '🎉 Goal reached!' : $store.wt.unit + ' remaining') : 'Set a target'"></span>
+                  </div>
+                  <!-- Total Change -->
+                  <div class="metric-card" :class="$store.wt.totalChange == null ? '' : $store.wt.totalChange < 0 ? 'accent' : 'warn'">
+                    <span class="mc-label">Total Change</span>
+                    <span class="mc-value" x-text="$store.wt.totalChange != null ? ($store.wt.totalChange > 0 ? '+' : '') + $store.wt.totalChange.toFixed(1) : '—'"></span>
+                    <span class="mc-sub" x-text="$store.wt.totalChange != null ? $store.wt.unit + ' since start' : 'Need 2+ entries'"></span>
+                  </div>
+                  <!-- Progress % -->
+                  <div class="metric-card" :class="$store.wt.progressPct == null ? '' : $store.wt.progressPct >= 100 ? 'accent' : $store.wt.progressPct >= 50 ? 'accent' : 'warn'">
+                    <span class="mc-label">Goal Progress</span>
+                    <span class="mc-value" x-text="$store.wt.progressPct != null ? Math.min(Math.max($store.wt.progressPct, 0), 100).toFixed(1) + '%' : '—'"></span>
+                    <span class="mc-sub" x-text="$store.wt.progressPct != null ? ($store.wt.progressPct >= 100 ? 'Target reached!' : 'Towards target') : 'Set start + target'"></span>
+                  </div>
+                  <!-- Total Entries -->
+                  <div class="metric-card">
+                    <span class="mc-label">Total Entries</span>
+                    <span class="mc-value" x-text="$store.wt.entries.length"></span>
+                    <span class="mc-sub" x-text="$store.wt.entries.length === 1 ? 'weigh-in' : 'weigh-ins'"></span>
+                  </div>
+                </div>
+
+                <!-- ── GAUGE + 7-DAY COMPARISONS ─────────────── -->
+                <div style="display:grid;grid-template-columns:minmax(260px,1fr) 2fr;gap:16px;margin-bottom:18px;align-items:start">
+
+                  <!-- Speedometer Gauge -->
+                  <div class="wt-section" style="padding:16px">
+                    <div class="wt-section-title">
+                      <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                      Goal Progress
+                    </div>
+                    <div style="position:relative">
+                      <div x-html="$store.wt.gaugeSVG" style="width:100%"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text3);margin-top:4px">
+                      <span x-text="$store.wt.startWeight != null ? 'Start: ' + $store.wt.startWeight + $store.wt.unit : ''"></span>
+                      <span x-text="$store.wt.targetWeight != null ? 'Goal: ' + $store.wt.targetWeight + $store.wt.unit : ''"></span>
+                    </div>
+                  </div>
+
+                  <!-- Comparison Cards -->
+                  <div style="display:flex;flex-direction:column;gap:14px">
+
+                    <!-- 7-day rolling avg comparison -->
+                    <div class="cmp-card">
+                      <div class="cmp-title">7-Day Rolling Average</div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div>
+                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">CURRENT 7 DAYS (AVG)</div>
+                          <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.wt.avg7 != null ? $store.wt.avg7.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.avg7Count + ' entries'"></div>
+                        </div>
+                        <div>
+                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">PREVIOUS 7 DAYS (AVG)</div>
+                          <div style="font-size:1.4rem;font-weight:700;color:var(--text2)" x-text="$store.wt.avgPrev7 != null ? $store.wt.avgPrev7.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.avgPrev7Count + ' entries'"></div>
+                        </div>
+                      </div>
+                      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <span style="font-size:0.78rem;color:var(--text3)">Change vs prev. 7 days:</span>
+                        <template x-if="$store.wt.change7 != null">
+                          <span class="cmp-change" :class="$store.wt.change7 < 0 ? 'good' : $store.wt.change7 > 0 ? 'bad' : 'neutral'">
+                            <svg style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                              <path :d="$store.wt.change7 < 0 ? 'M12 5v14M5 18l7 4 7-4' : $store.wt.change7 > 0 ? 'M12 19V5M5 6l7-4 7 4' : 'M5 12h14'"/>
+                            </svg>
+                            <span x-text="($store.wt.change7 > 0 ? '+' : '') + $store.wt.change7.toFixed(2) + ' ' + $store.wt.unit"></span>
+                          </span>
+                        </template>
+                        <template x-if="$store.wt.change7 == null">
+                          <span style="font-size:0.78rem;color:var(--text3)">Not enough data</span>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- Calendar week comparison -->
+                    <div class="cmp-card">
+                      <div class="cmp-title">Weekly Calendar Average (Mon–Sun)</div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div>
+                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">THIS WEEK (AVG)</div>
+                          <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.wt.avgThisWeek != null ? $store.wt.avgThisWeek.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.thisWeekCount + ' entries'"></div>
+                        </div>
+                        <div>
+                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">LAST WEEK (AVG)</div>
+                          <div style="font-size:1.4rem;font-weight:700;color:var(--text2)" x-text="$store.wt.avgLastWeek != null ? $store.wt.avgLastWeek.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.lastWeekCount + ' entries'"></div>
+                        </div>
+                      </div>
+                      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <span style="font-size:0.78rem;color:var(--text3)">Change vs last week:</span>
+                        <template x-if="$store.wt.weekChange != null">
+                          <span class="cmp-change" :class="$store.wt.weekChange < 0 ? 'good' : $store.wt.weekChange > 0 ? 'bad' : 'neutral'">
+                            <svg style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                              <path :d="$store.wt.weekChange < 0 ? 'M12 5v14M5 18l7 4 7-4' : $store.wt.weekChange > 0 ? 'M12 19V5M5 6l7-4 7 4' : 'M5 12h14'"/>
+                            </svg>
+                            <span x-text="($store.wt.weekChange > 0 ? '+' : '') + $store.wt.weekChange.toFixed(2) + ' ' + $store.wt.unit"></span>
+                          </span>
+                        </template>
+                        <template x-if="$store.wt.weekChange == null">
+                          <span style="font-size:0.78rem;color:var(--text3)">Not enough data</span>
+                        </template>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- ── LINE CHART ───────────────────────────── -->
+                <div class="wt-section" style="padding:16px">
+                  <div class="wt-section-title">
+                    <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>
+                    Weight History
+                    <span style="margin-left:auto;font-size:0.7rem;color:var(--text3)" x-text="$store.wt.entries.length > 0 ? 'Last ' + Math.min($store.wt.entries.length, 90) + ' entries' : ''"></span>
+                  </div>
+                  <template x-if="$store.wt.entries.length >= 2">
+                    <div class="chart-wrap">
+                      <div x-html="$store.wt.lineChartSVG"></div>
+                    </div>
+                  </template>
+                  <template x-if="$store.wt.entries.length < 2">
+                    <div class="empty-state" style="padding:40px">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>
+                      <p style="font-size:0.9rem;font-weight:600;margin-bottom:4px">No chart yet</p>
+                      <p style="font-size:0.82rem">Add at least 2 weight entries to see your progress chart.</p>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- ── ENTRY FORM + TARGET FORM ─────────────── -->
+                <div class="forms-grid">
+
+                  <!-- Log Weight -->
+                  <div class="wt-section">
+                    <div class="wt-section-title">
+                      <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                      Log Weight
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Date</label>
+                      <input type="date" x-model="$store.wt.formDate" style="width:100%" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" x-text="'Weight (' + $store.wt.unit + ')'"></label>
+                      <input type="number" x-model.number="$store.wt.formWeight" step="0.1" min="1" max="500" placeholder="e.g. 82.5" style="width:100%" @keyup.enter="$store.wt.saveEntry()" />
+                    </div>
+                    <div x-show="$store.wt.formDate && $store.wt.hasEntryForDate($store.wt.formDate)"
+                      style="font-size:0.78rem;color:var(--warning);margin-bottom:10px;padding:6px 10px;background:rgba(245,158,11,0.08);border-radius:var(--radius-sm);border:1px solid rgba(245,158,11,0.2)">
+                      ⚠ Entry already exists for this date — saving will overwrite it.
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;justify-content:center" @click="$store.wt.saveEntry()" :disabled="$store.wt.saving || !$store.wt.formWeight || !$store.wt.formDate">
+                      <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                      <span x-text="$store.wt.hasEntryForDate($store.wt.formDate) ? 'Update Entry' : 'Save Entry'"></span>
+                    </button>
+                  </div>
+
+                  <!-- Weight Target -->
+                  <div class="wt-section">
+                    <div class="wt-section-title">
+                      <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                      Weight Target
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Target Weight</label>
+                      <input type="number" x-model.number="$store.wt.formTargetWeight" step="0.1" min="1" max="500" placeholder="e.g. 75.0" style="width:100%" @keyup.enter="$store.wt.saveTarget()" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Unit</label>
+                      <select x-model="$store.wt.formUnit" style="width:100%">
+                        <option value="kg">kg (kilograms)</option>
+                        <option value="lbs">lbs (pounds)</option>
+                      </select>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;justify-content:center" @click="$store.wt.saveTarget()" :disabled="$store.wt.saving || !$store.wt.formTargetWeight">
+                      <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                      Save Target
+                    </button>
+                    <template x-if="$store.wt.targetWeight != null && $store.wt.currentWeight != null">
+                      <div style="margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">
+                        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:6px">AT CURRENT PACE</div>
+                        <div style="font-size:0.82rem;color:var(--text2)" x-text="$store.wt.etaText"></div>
+                      </div>
+                    </template>
+                  </div>
+
+                </div>
+
+                <!-- ── HISTORY TABLE ──────────────────────────── -->
+                <div class="wt-section" style="padding:0">
+                  <div style="padding:16px 16px 12px" class="wt-section-title">
+                    <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                    Entry History
+                    <span style="margin-left:auto;font-size:0.7rem;color:var(--text3)" x-text="$store.wt.entries.length + ' entries'"></span>
+                  </div>
+                  <div>
+                    <!-- Header -->
+                    <div class="wt-history-row header">
+                      <span>Date</span>
+                      <span>Weight</span>
+                      <span>Change</span>
+                      <span></span>
+                    </div>
+                    <!-- Rows (newest first) -->
+                    <template x-for="(entry, i) in $store.wt.entriesDesc" :key="entry.date">
+                      <div class="wt-history-row">
+                        <span style="color:var(--text2)" x-text="$store.wt.formatDate(entry.date)"></span>
+                        <span style="font-weight:600" x-text="entry.weight + ' ' + $store.wt.unit"></span>
+                        <span :class="$store.wt.historyDelta(i) < 0 ? 'badge badge-accent' : $store.wt.historyDelta(i) > 0 ? 'badge badge-danger' : 'badge'"
+                          x-text="$store.wt.historyDelta(i) !== null ? ($store.wt.historyDelta(i) > 0 ? '+' : '') + $store.wt.historyDelta(i).toFixed(1) + ' ' + $store.wt.unit : '—'">
+                        </span>
+                        <button class="btn-icon" style="color:var(--danger);width:28px;height:28px" title="Delete entry"
+                          @click="$store.wt.deleteEntry(entry.date)">
+                          <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                        </button>
+                      </div>
+                    </template>
+                    <div x-show="!$store.wt.entries.length" class="empty-state" style="padding:40px">
+                      <p style="font-size:0.9rem">No entries yet. Log your first weight above!</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div><!-- /max-width wrapper -->
+            </main>
+          </div><!-- /body -->
+
+          <!-- ═ TOASTS ══════════════════════════════════════════════ -->
+          <div style="position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:200">
+            <template x-for="toast in $store.wt.toasts" :key="toast.id">
+              <div class="toast" :class="toast.type === 'error' ? 'toast-error' : 'toast-success'">
+                <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <template x-if="toast.type !== 'error'"><path d="M20 6L9 17l-5-5"/></template>
+                  <template x-if="toast.type === 'error'"><path d="M18 6L6 18M6 6l12 12"/></template>
+                </svg>
+                <span x-text="toast.msg"></span>
+              </div>
+            </template>
+          </div>
+
+        </div><!-- /app shell -->
+      </template>
+    </div><!-- /root -->
+
+    <script type="module">
+      import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3/dist/module.esm.js";
+      import { auth, db } from "./js/firebase.js";
+      import {
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+      import {
+        collection,
+        doc,
+        getDocs,
+        getDoc,
+        setDoc,
+        deleteDoc,
+        query,
+        orderBy,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+      // ── Helpers ────────────────────────────────────────────────
+      function todayISO() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      function avg(arr) {
+        if (!arr.length) return null;
+        return arr.reduce((s, v) => s + v, 0) / arr.length;
+      }
+
+      // Return YYYY-MM-DD for a date offset by `days` from today
+      function dateOffset(days) {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        return d.toISOString().slice(0, 10);
+      }
+
+      // Get Monday of the week containing `dateStr`
+      function weekStart(dateStr) {
+        const d = new Date(dateStr + "T00:00:00");
+        const day = d.getDay(); // 0=Sun
+        const diff = (day === 0 ? -6 : 1 - day); // shift to Monday
+        d.setDate(d.getDate() + diff);
+        return d.toISOString().slice(0, 10);
+      }
+
+      // ── SVG Chart helpers ──────────────────────────────────────
+      function polarToXY(cx, cy, r, angleDeg) {
+        const rad = angleDeg * Math.PI / 180;
+        return {
+          x: cx + r * Math.cos(rad),
+          y: cy - r * Math.sin(rad),
+        };
+      }
+
+      Alpine.store("wt", {
+        // ── Auth ────────────────────────────────────────────────
+        authState: "loading",
+        user: null,
+        authEmail: "",
+        authPassword: "",
+        authLoading: false,
+        authError: "",
+
+        // ── Data ────────────────────────────────────────────────
+        entries: [],          // [{date:'YYYY-MM-DD', weight:number}] sorted asc
+        targetWeight: null,
+        startWeight: null,    // earliest entry weight
+        unit: "kg",
+
+        // ── UI ──────────────────────────────────────────────────
+        sidebarOpen: window.innerWidth >= 921,
+        saving: false,
+        toasts: [],
+
+        // ── Forms ───────────────────────────────────────────────
+        formDate: todayISO(),
+        formWeight: "",
+        formTargetWeight: "",
+        formUnit: "kg",
+
+        // ── Computed: entries sorted desc ───────────────────────
+        get entriesDesc() {
+          return [...this.entries].sort((a, b) => b.date.localeCompare(a.date));
+        },
+
+        get recentEntries() {
+          return this.entriesDesc.slice(0, 12);
+        },
+
+        get lastEntryDate() {
+          if (!this.entries.length) return null;
+          return this.entries[this.entries.length - 1].date;
+        },
+
+        get currentWeight() {
+          if (!this.entries.length) return null;
+          return this.entries[this.entries.length - 1].weight;
+        },
+
+        get toGo() {
+          if (this.currentWeight == null || this.targetWeight == null) return null;
+          const diff = this.currentWeight - this.targetWeight;
+          return Math.round(diff * 10) / 10;
+        },
+
+        get totalChange() {
+          if (this.entries.length < 2) return null;
+          const first = this.entries[0].weight;
+          const last = this.currentWeight;
+          return Math.round((last - first) * 10) / 10;
+        },
+
+        get progressPct() {
+          if (this.startWeight == null || this.targetWeight == null || this.currentWeight == null) return null;
+          if (this.startWeight === this.targetWeight) return 100;
+          const pct = ((this.startWeight - this.currentWeight) / (this.startWeight - this.targetWeight)) * 100;
+          return Math.round(pct * 10) / 10;
+        },
+
+        // ── 7-day rolling averages ───────────────────────────────
+        get avg7() {
+          const cutoff = dateOffset(-7);
+          const today = todayISO();
+          const ws = this.entries.filter(e => e.date > cutoff && e.date <= today).map(e => e.weight);
+          return ws.length ? Math.round(avg(ws) * 100) / 100 : null;
+        },
+        get avg7Count() {
+          const cutoff = dateOffset(-7);
+          return this.entries.filter(e => e.date > cutoff && e.date <= todayISO()).length;
+        },
+
+        get avgPrev7() {
+          const start = dateOffset(-14);
+          const end = dateOffset(-7);
+          const ws = this.entries.filter(e => e.date > start && e.date <= end).map(e => e.weight);
+          return ws.length ? Math.round(avg(ws) * 100) / 100 : null;
+        },
+        get avgPrev7Count() {
+          const start = dateOffset(-14);
+          const end = dateOffset(-7);
+          return this.entries.filter(e => e.date > start && e.date <= end).length;
+        },
+
+        get change7() {
+          if (this.avg7 == null || this.avgPrev7 == null) return null;
+          return Math.round((this.avg7 - this.avgPrev7) * 100) / 100;
+        },
+
+        // ── Calendar week averages ───────────────────────────────
+        get avgThisWeek() {
+          const mon = weekStart(todayISO());
+          const sun = dateOffset(6 - (new Date(todayISO() + "T00:00:00").getDay() || 7) + 1);
+          const ws = this.entries.filter(e => e.date >= mon && e.date <= todayISO()).map(e => e.weight);
+          return ws.length ? Math.round(avg(ws) * 100) / 100 : null;
+        },
+        get thisWeekCount() {
+          const mon = weekStart(todayISO());
+          return this.entries.filter(e => e.date >= mon && e.date <= todayISO()).length;
+        },
+
+        get avgLastWeek() {
+          // Last Mon–Sun
+          const thisMon = weekStart(todayISO());
+          const lastSun = new Date(thisMon + "T00:00:00");
+          lastSun.setDate(lastSun.getDate() - 1);
+          const lastSunStr = lastSun.toISOString().slice(0, 10);
+          const lastMon = weekStart(lastSunStr);
+          const ws = this.entries.filter(e => e.date >= lastMon && e.date <= lastSunStr).map(e => e.weight);
+          return ws.length ? Math.round(avg(ws) * 100) / 100 : null;
+        },
+        get lastWeekCount() {
+          const thisMon = weekStart(todayISO());
+          const lastSun = new Date(thisMon + "T00:00:00");
+          lastSun.setDate(lastSun.getDate() - 1);
+          const lastSunStr = lastSun.toISOString().slice(0, 10);
+          const lastMon = weekStart(lastSunStr);
+          return this.entries.filter(e => e.date >= lastMon && e.date <= lastSunStr).length;
+        },
+
+        get weekChange() {
+          if (this.avgThisWeek == null || this.avgLastWeek == null) return null;
+          return Math.round((this.avgThisWeek - this.avgLastWeek) * 100) / 100;
+        },
+
+        // ── ETA ─────────────────────────────────────────────────
+        get etaText() {
+          if (this.toGo == null || this.toGo <= 0) return "🎉 Goal already reached!";
+          if (this.change7 == null || this.change7 >= 0) return "Not enough trend data to estimate ETA.";
+          const weeklyRate = Math.abs(this.change7); // avg loss per 7 days
+          if (weeklyRate === 0) return "No recent change — ETA unknown.";
+          const weeks = this.toGo / weeklyRate;
+          if (weeks > 200) return "At current pace: very long-term goal.";
+          const days = Math.round(weeks * 7);
+          const eta = new Date();
+          eta.setDate(eta.getDate() + days);
+          return `At current pace: ~${days} days (${eta.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })})`;
+        },
+
+        // ── Sidebar delta (newest-first list) ────────────────────
+        entryDelta(i) {
+          const list = this.recentEntries;
+          if (i >= list.length - 1) return null;
+          const diff = list[i].weight - list[i + 1].weight;
+          return Math.round(diff * 10) / 10;
+        },
+
+        // ── History delta (newest-first desc list) ───────────────
+        historyDelta(i) {
+          const list = this.entriesDesc;
+          if (i >= list.length - 1) return null;
+          const diff = list[i].weight - list[i + 1].weight;
+          return Math.round(diff * 10) / 10;
+        },
+
+        // ── Has entry for date ───────────────────────────────────
+        hasEntryForDate(dateStr) {
+          return this.entries.some(e => e.date === dateStr);
+        },
+
+        // ── Date formatting ──────────────────────────────────────
+        formatDate(dateStr) {
+          if (!dateStr) return "—";
+          const d = new Date(dateStr + "T00:00:00");
+          return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+        },
+        formatDateShort(dateStr) {
+          if (!dateStr) return "—";
+          const d = new Date(dateStr + "T00:00:00");
+          return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+        },
+
+        // ── Gauge SVG ────────────────────────────────────────────
+        get gaugeSVG() {
+          const W = 300, H = 170;
+          const cx = 150, cy = 148, r = 108, rInner = 72;
+          const progress = Math.min(Math.max(this.progressPct != null ? this.progressPct / 100 : 0, 0), 1);
+
+          // Angles: 180° = left, 0° = right (standard math coords, SVG y-flipped)
+          // Progress maps 0→180°, 1→0°
+          const startAngle = 180;
+          const endAngle = 0;
+          const currentAngle = 180 - progress * 180;
+
+          const leftPt  = polarToXY(cx, cy, r, 180);
+          const rightPt = polarToXY(cx, cy, r, 0);
+          const currPt  = polarToXY(cx, cy, r, currentAngle);
+
+          // Background arc (full semicircle)
+          const bgArc = `M ${leftPt.x} ${leftPt.y} A ${r} ${r} 0 0 1 ${rightPt.x} ${rightPt.y}`;
+
+          // Progress arc
+          let progArc = "";
+          if (progress > 0.001) {
+            const large = progress > 0.5 ? 1 : 0;
+            progArc = `M ${leftPt.x} ${leftPt.y} A ${r} ${r} 0 ${large} 1 ${currPt.x} ${currPt.y}`;
+          }
+
+          // Zone arcs (danger=0-33%, warn=33-66%, good=66-100%)
+          const z1 = polarToXY(cx, cy, r, 180 - 0.33 * 180);
+          const z2 = polarToXY(cx, cy, r, 180 - 0.66 * 180);
+
+          // Needle
+          const needleLen = r * 0.82;
+          const needlePt = polarToXY(cx, cy, needleLen, currentAngle);
+
+          // Color based on progress
+          const color = progress >= 1 ? "#22c55e" : progress >= 0.6 ? "#22c55e" : progress >= 0.3 ? "#f59e0b" : "#ef4444";
+
+          // Tick marks
+          let ticks = "";
+          for (let t = 0; t <= 10; t++) {
+            const angle = 180 - t * 18;
+            const pt1 = polarToXY(cx, cy, r - 2, angle);
+            const pt2 = polarToXY(cx, cy, r + (t % 5 === 0 ? 12 : 7), angle);
+            ticks += `<line x1="${pt1.x.toFixed(1)}" y1="${pt1.y.toFixed(1)}" x2="${pt2.x.toFixed(1)}" y2="${pt2.y.toFixed(1)}" stroke="var(--border)" stroke-width="${t % 5 === 0 ? 2 : 1}"/>`;
+          }
+
+          // Percentage labels on arc
+          let pctLabels = "";
+          [0, 25, 50, 75, 100].forEach(pct => {
+            const angle = 180 - pct * 1.8;
+            const pt = polarToXY(cx, cy, r + 22, angle);
+            pctLabels += `<text x="${pt.x.toFixed(1)}" y="${pt.y.toFixed(1)}" font-size="9" fill="var(--text3)" text-anchor="middle" dominant-baseline="middle">${pct}%</text>`;
+          });
+
+          const displayPct = this.progressPct != null ? Math.min(Math.max(this.progressPct, 0), 100).toFixed(1) : "—";
+          const displayLbl = this.progressPct == null ? "Set target" : this.progressPct >= 100 ? "Goal reached!" : "Progress";
+
+          return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto">
+            <!-- Zone background arcs -->
+            <path d="M ${leftPt.x.toFixed(1)} ${leftPt.y.toFixed(1)} A ${r} ${r} 0 0 1 ${z1.x.toFixed(1)} ${z1.y.toFixed(1)}" fill="none" stroke="rgba(239,68,68,0.18)" stroke-width="14" stroke-linecap="butt"/>
+            <path d="M ${z1.x.toFixed(1)} ${z1.y.toFixed(1)} A ${r} ${r} 0 0 1 ${z2.x.toFixed(1)} ${z2.y.toFixed(1)}" fill="none" stroke="rgba(245,158,11,0.18)" stroke-width="14" stroke-linecap="butt"/>
+            <path d="M ${z2.x.toFixed(1)} ${z2.y.toFixed(1)} A ${r} ${r} 0 0 1 ${rightPt.x.toFixed(1)} ${rightPt.y.toFixed(1)}" fill="none" stroke="rgba(34,197,94,0.18)" stroke-width="14" stroke-linecap="butt"/>
+            <!-- Track arc -->
+            <path d="${bgArc}" fill="none" stroke="var(--border)" stroke-width="14" stroke-linecap="round"/>
+            <!-- Progress arc -->
+            ${progress > 0.001 ? `<path d="${progArc}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="round"/>` : ""}
+            <!-- Ticks -->
+            ${ticks}
+            ${pctLabels}
+            <!-- Needle -->
+            <line x1="${cx}" y1="${cy}" x2="${needlePt.x.toFixed(1)}" y2="${needlePt.y.toFixed(1)}" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="${cx}" cy="${cy}" r="8" fill="var(--surface3)" stroke="${color}" stroke-width="2.5"/>
+            <circle cx="${cx}" cy="${cy}" r="3" fill="${color}"/>
+            <!-- Center text -->
+            <text x="${cx}" y="${cy - 28}" font-size="26" font-weight="700" fill="${color}" text-anchor="middle" dominant-baseline="middle">${displayPct}${this.progressPct != null ? '%' : ''}</text>
+            <text x="${cx}" y="${cy - 8}" font-size="10" fill="var(--text3)" text-anchor="middle">${displayLbl}</text>
+            <!-- Start / End labels -->
+            <text x="${leftPt.x - 6}" y="${leftPt.y + 16}" font-size="9" fill="var(--text3)" text-anchor="middle">Start</text>
+            <text x="${rightPt.x + 6}" y="${rightPt.y + 16}" font-size="9" fill="var(--accent)" text-anchor="middle">Goal</text>
+          </svg>`;
+        },
+
+        // ── Line Chart SVG ───────────────────────────────────────
+        get lineChartSVG() {
+          const allEntries = this.entries;
+          if (allEntries.length < 2) return "";
+
+          // Show last 90 entries max
+          const data = allEntries.slice(-90);
+          const W = 800, H = 280;
+          const pad = { top: 24, right: 28, bottom: 46, left: 52 };
+          const plotW = W - pad.left - pad.right;
+          const plotH = H - pad.top - pad.bottom;
+
+          const weights = data.map(e => e.weight);
+          const minW = Math.min(...weights);
+          const maxW = Math.max(...weights);
+          const padding = Math.max((maxW - minW) * 0.12, 0.5);
+          const yMin = minW - padding;
+          const yMax = maxW + padding;
+
+          // Also include target in range
+          const effectiveYMin = this.targetWeight != null ? Math.min(yMin, this.targetWeight - padding * 0.5) : yMin;
+          const effectiveYMax = this.targetWeight != null ? Math.max(yMax, this.targetWeight + padding * 0.5) : yMax;
+          const yRange = effectiveYMax - effectiveYMin;
+
+          const xScale = (i) => pad.left + (i / (data.length - 1)) * plotW;
+          const yScale = (w) => pad.top + plotH - ((w - effectiveYMin) / yRange) * plotH;
+
+          // Grid lines (5 horizontal)
+          const yTicks = 5;
+          let gridLines = "", yLabels = "";
+          for (let i = 0; i <= yTicks; i++) {
+            const val = effectiveYMin + (yRange / yTicks) * i;
+            const y = yScale(val);
+            gridLines += `<line x1="${pad.left}" y1="${y.toFixed(1)}" x2="${W - pad.right}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,4"/>`;
+            yLabels += `<text x="${pad.left - 6}" y="${y.toFixed(1)}" font-size="10" fill="var(--text3)" text-anchor="end" dominant-baseline="middle">${val.toFixed(1)}</text>`;
+          }
+
+          // X labels (show ~6 evenly spaced)
+          let xLabels = "";
+          const xLabelCount = Math.min(data.length, 6);
+          const step = Math.floor((data.length - 1) / (xLabelCount - 1)) || 1;
+          for (let i = 0; i < data.length; i += step) {
+            const x = xScale(i);
+            const d = new Date(data[i].date + "T00:00:00");
+            const lbl = d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+            xLabels += `<text x="${x.toFixed(1)}" y="${H - pad.bottom + 16}" font-size="10" fill="var(--text3)" text-anchor="middle">${lbl}</text>`;
+            // Tick
+            gridLines += `<line x1="${x.toFixed(1)}" y1="${pad.top + plotH}" x2="${x.toFixed(1)}" y2="${pad.top + plotH + 4}" stroke="var(--border)" stroke-width="1"/>`;
+          }
+
+          // Area fill
+          const pts = data.map((e, i) => `${xScale(i).toFixed(1)},${yScale(e.weight).toFixed(1)}`);
+          const bottomY = (pad.top + plotH).toFixed(1);
+          const areaPath = `M ${xScale(0).toFixed(1)},${bottomY} L ${pts.join(" L ")} L ${xScale(data.length - 1).toFixed(1)},${bottomY} Z`;
+
+          // Polyline
+          const linePts = pts.join(" ");
+
+          // Moving average (7-point) overlay
+          let maPath = "";
+          if (data.length >= 7) {
+            const maPts = [];
+            for (let i = 0; i < data.length; i++) {
+              const window = data.slice(Math.max(0, i - 3), Math.min(data.length, i + 4));
+              const mavg = avg(window.map(e => e.weight));
+              maPts.push(`${xScale(i).toFixed(1)},${yScale(mavg).toFixed(1)}`);
+            }
+            maPath = `<polyline points="${maPts.join(" ")}" fill="none" stroke="rgba(245,158,11,0.7)" stroke-width="1.5" stroke-dasharray="5,3"/>`;
+          }
+
+          // Target line
+          let targetLine = "";
+          if (this.targetWeight != null && this.targetWeight >= effectiveYMin && this.targetWeight <= effectiveYMax) {
+            const ty = yScale(this.targetWeight).toFixed(1);
+            targetLine = `
+              <line x1="${pad.left}" y1="${ty}" x2="${W - pad.right}" y2="${ty}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.7"/>
+              <text x="${W - pad.right - 4}" y="${parseFloat(ty) - 5}" font-size="9" fill="var(--accent)" text-anchor="end">Target ${this.targetWeight}${this.unit}</text>
+            `;
+          }
+
+          // Dots (only for smaller datasets)
+          let dots = "";
+          if (data.length <= 30) {
+            data.forEach((e, i) => {
+              dots += `<circle cx="${xScale(i).toFixed(1)}" cy="${yScale(e.weight).toFixed(1)}" r="3.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+            });
+          } else {
+            // First and last dot
+            dots = `<circle cx="${xScale(0).toFixed(1)}" cy="${yScale(data[0].weight).toFixed(1)}" r="3.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+            dots += `<circle cx="${xScale(data.length-1).toFixed(1)}" cy="${yScale(data[data.length-1].weight).toFixed(1)}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+          }
+
+          // Latest weight label
+          const lx = xScale(data.length - 1);
+          const ly = yScale(data[data.length - 1].weight);
+          const latestLabel = `<text x="${(lx - 8).toFixed(1)}" y="${(ly - 12).toFixed(1)}" font-size="11" font-weight="700" fill="var(--accent)" text-anchor="end">${data[data.length-1].weight}${this.unit}</text>`;
+
+          return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
+              </linearGradient>
+              <clipPath id="chartClip">
+                <rect x="${pad.left}" y="${pad.top}" width="${plotW}" height="${plotH}"/>
+              </clipPath>
+            </defs>
+            <!-- Background -->
+            <rect width="${W}" height="${H}" fill="var(--surface2)" rx="0"/>
+            <!-- Grid -->
+            ${gridLines}
+            <!-- Area -->
+            <path d="${areaPath}" fill="url(#areaGrad)" clip-path="url(#chartClip)"/>
+            <!-- Target line -->
+            ${targetLine}
+            <!-- MA overlay -->
+            <g clip-path="url(#chartClip)">${maPath}</g>
+            <!-- Line -->
+            <polyline points="${linePts}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" clip-path="url(#chartClip)"/>
+            <!-- Dots -->
+            <g clip-path="url(#chartClip)">${dots}</g>
+            <!-- Latest label -->
+            ${latestLabel}
+            <!-- Axes -->
+            <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top + plotH}" stroke="var(--border)" stroke-width="1"/>
+            <line x1="${pad.left}" y1="${pad.top + plotH}" x2="${W - pad.right}" y2="${pad.top + plotH}" stroke="var(--border)" stroke-width="1"/>
+            <!-- Labels -->
+            ${yLabels}
+            ${xLabels}
+            <!-- Legend -->
+            <line x1="${pad.left + 10}" y1="${H - 12}" x2="${pad.left + 24}" y2="${H - 12}" stroke="var(--accent)" stroke-width="2"/>
+            <text x="${pad.left + 28}" y="${H - 8}" font-size="9" fill="var(--text3)">Weight</text>
+            ${data.length >= 7 ? `<line x1="${pad.left + 80}" y1="${H - 12}" x2="${pad.left + 94}" y2="${H - 12}" stroke="rgba(245,158,11,0.7)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="${pad.left + 98}" y="${H - 8}" font-size="9" fill="var(--text3)">7-pt moving avg</text>` : ""}
+          </svg>`;
+        },
+
+        // ── Init ────────────────────────────────────────────────
+        init() {
+          onAuthStateChanged(auth, async (user) => {
+            if (user) {
+              this.user = user;
+              this.authState = "authenticated";
+              await this.loadData();
+            } else {
+              this.user = null;
+              this.authState = "unauthenticated";
+              this.entries = [];
+            }
+          });
+        },
+
+        async loadData() {
+          try {
+            const uid = this.user.uid;
+
+            // Load entries
+            const snap = await getDocs(
+              query(collection(db, `users/${uid}/weightEntries`), orderBy("date", "asc"))
+            );
+            this.entries = snap.docs.map(d => ({ date: d.id, weight: d.data().weight }));
+
+            // Load settings
+            const settingsDoc = await getDoc(doc(db, `users/${uid}/weightSettings/settings`));
+            if (settingsDoc.exists()) {
+              const data = settingsDoc.data();
+              this.targetWeight = data.targetWeight ?? null;
+              this.unit = data.unit || "kg";
+              this.startWeight = data.startWeight ?? (this.entries[0]?.weight ?? null);
+            } else if (this.entries.length) {
+              this.startWeight = this.entries[0].weight;
+            }
+
+            // Populate forms with current settings
+            this.formTargetWeight = this.targetWeight ?? "";
+            this.formUnit = this.unit;
+          } catch (e) {
+            this.toast("Failed to load data: " + e.message, "error");
+          }
+        },
+
+        // ── Save weight entry ────────────────────────────────────
+        async saveEntry() {
+          if (!this.formWeight || !this.formDate) return;
+          const weight = Math.round(Number(this.formWeight) * 10) / 10;
+          if (isNaN(weight) || weight <= 0) { this.toast("Enter a valid weight", "error"); return; }
+
+          this.saving = true;
+          try {
+            const uid = this.user.uid;
+            await setDoc(doc(db, `users/${uid}/weightEntries/${this.formDate}`), {
+              weight,
+              date: this.formDate,
+              updatedAt: serverTimestamp(),
+            });
+
+            // Update local state (upsert)
+            const idx = this.entries.findIndex(e => e.date === this.formDate);
+            if (idx >= 0) {
+              this.entries[idx] = { date: this.formDate, weight };
+            } else {
+              this.entries = [...this.entries, { date: this.formDate, weight }]
+                .sort((a, b) => a.date.localeCompare(b.date));
+            }
+
+            // Update startWeight if earliest entry changed
+            if (this.entries.length === 1 || this.formDate < this.entries[0].date) {
+              this.startWeight = weight;
+              await this._updateStartWeight(uid, weight);
+            }
+
+            this.toast("Weight logged ✓");
+            this.formWeight = "";
+            this.formDate = todayISO();
+          } catch (e) {
+            this.toast("Save failed: " + e.message, "error");
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        // ── Save target ──────────────────────────────────────────
+        async saveTarget() {
+          if (!this.formTargetWeight) return;
+          const tw = Math.round(Number(this.formTargetWeight) * 10) / 10;
+          if (isNaN(tw) || tw <= 0) { this.toast("Enter a valid target", "error"); return; }
+
+          this.saving = true;
+          try {
+            const uid = this.user.uid;
+            await setDoc(doc(db, `users/${uid}/weightSettings/settings`), {
+              targetWeight: tw,
+              unit: this.formUnit,
+              startWeight: this.startWeight ?? (this.entries[0]?.weight ?? null),
+              updatedAt: serverTimestamp(),
+            }, { merge: true });
+            this.targetWeight = tw;
+            this.unit = this.formUnit;
+            this.toast("Target saved ✓");
+          } catch (e) {
+            this.toast("Save failed: " + e.message, "error");
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        async _updateStartWeight(uid, sw) {
+          await setDoc(doc(db, `users/${uid}/weightSettings/settings`), {
+            startWeight: sw,
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+          this.startWeight = sw;
+        },
+
+        // ── Delete entry ─────────────────────────────────────────
+        async deleteEntry(dateStr) {
+          if (!confirm(`Delete entry for ${this.formatDateShort(dateStr)}?`)) return;
+          this.saving = true;
+          try {
+            await deleteDoc(doc(db, `users/${this.user.uid}/weightEntries/${dateStr}`));
+            this.entries = this.entries.filter(e => e.date !== dateStr);
+            if (this.entries.length && this.startWeight !== this.entries[0].weight) {
+              this.startWeight = this.entries[0].weight;
+              await this._updateStartWeight(this.user.uid, this.startWeight);
+            }
+            this.toast("Entry deleted");
+          } catch (e) {
+            this.toast("Delete failed: " + e.message, "error");
+          } finally {
+            this.saving = false;
+          }
+        },
+
+        // ── Auth ─────────────────────────────────────────────────
+        async login() {
+          this.authError = "";
+          if (!this.authEmail || !this.authPassword) { this.authError = "Please fill in all fields."; return; }
+          this.authLoading = true;
+          try {
+            await signInWithEmailAndPassword(auth, this.authEmail, this.authPassword);
+          } catch (e) {
+            const map = {
+              "auth/user-not-found": "No account with that email.",
+              "auth/wrong-password": "Incorrect password.",
+              "auth/invalid-credential": "Invalid email or password.",
+              "auth/too-many-requests": "Too many attempts. Try again later.",
+            };
+            this.authError = map[e.code] ?? "Sign-in failed. Please try again.";
+          } finally {
+            this.authLoading = false;
+          }
+        },
+
+        async logout() {
+          await signOut(auth);
+          this.entries = [];
+          this.targetWeight = null;
+          this.startWeight = null;
+        },
+
+        // ── Toasts ───────────────────────────────────────────────
+        toast(msg, type = "success") {
+          const id = Date.now();
+          this.toasts.push({ id, msg, type });
+          setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 3500);
+        },
+      });
+
+      Alpine.start();
+    </script>
+  </body>
+</html>
