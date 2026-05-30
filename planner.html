@@ -426,10 +426,10 @@
 
               <!-- Active plan editor -->
               <template x-if="$store.planner.activePlan">
-                <div style="padding:clamp(12px, 3vw, 20px)">
+                <div style="background:var(--surface);height: 100%;">
 
                   <!-- Plan header / settings -->
-                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:clamp(12px,3vw,20px);margin-bottom:16px">
+                  <div style="background:var(--surface);padding:clamp(12px,3vw,20px);margin-bottom:16px">
                     <div style="display:flex;align-items:flex-;justify-content:space-between;gap:12px;flex-wrap:wrap" >
                       <div style="flex:1;min-width:0;width:100%">
                         <label class="form-label" x-text="$store.planner.t('plan_name_label')"></label>
@@ -816,7 +816,7 @@
         .plan-settings-header { flex-direction: column !important; }
       }
       @media (min-width: 921px) { .sidebar-mobile-header { display: none !important; } }
-      @media (max-width: 575px) { .plan-header { gap:16px; flex-direction: column !important; align-items: flex-start !important; justify-content: flex-start !important; } }
+      @media (max-width: 700px) { .plan-header { gap:16px; flex-direction: column !important; align-items: flex-start !important; justify-content: flex-start !important; } }
 
       /* Ensure main and all children can't overflow viewport */
       main { min-width: 0; overflow-x: hidden; }
