@@ -31,12 +31,12 @@
       /* Mobile-first: drag | food | [stats] | remove */
       .meal-item-grid {
         display: grid;
-        grid-template-columns: 20px 1fr 58px;
+        grid-template-columns: 18px 1fr 44px;
         grid-template-rows: auto auto;
-        row-gap: 4px;
+        row-gap: 2px;
         align-items: center;
-        gap: 8px;
-        padding: 10px 12px;
+        gap: 5px;
+        padding: 4px 8px;
         border-bottom: 1px solid var(--border);
         font-size: 0.875rem;
       }
@@ -60,8 +60,8 @@
         grid-column: 2;
         grid-row: 2;
       }
-      .item-stats-row input { width: 62px; flex-shrink: 0; }
-      .item-stats-row span { font-size: 0.78rem; }
+      .item-stats-row input { width: 56px; flex-shrink: 0; }
+      .item-stats-row span { font-size: 0.76rem; }
       /* Remove button spans rows 1-2 */
       .meal-item-grid > :nth-child(4) { grid-column: 3; grid-row: 1 / 3; align-self: center; }
 
@@ -69,10 +69,10 @@
       @media (min-width: 921px) {
         .meal-header-row { display: grid !important; }
         .meal-item-grid {
-          grid-template-columns: 18px 1fr 100px 70px 75px 70px 70px 70px 58px;
+          grid-template-columns: 16px 1fr 82px 60px 68px 60px 60px 60px 44px;
           grid-template-rows: auto;
           row-gap: 0;
-          padding: 8px 16px;
+          padding: 3px 10px;
         }
         /* Reset mobile overrides */
         .meal-item-grid > :nth-child(1) { grid-column: auto; grid-row: auto; }
@@ -92,6 +92,8 @@
       .drag-handle:active { cursor: grabbing; }
       .meal-item-scratched { opacity: 0.45; }
       .meal-item-scratched .item-food-name { text-decoration: line-through; }
+      .item-actions { display:flex; gap:1px; align-items:center; justify-content:center; }
+      @media (max-width: 920px) { .item-actions { flex-direction:column; } }
     </style>
   </head>
   <body>
@@ -512,8 +514,9 @@
                       </div>
 
                       <!-- Meals list -->
+                      <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px">
                       <template x-for="(meal, mealIdx) in $store.planner.activePlan.meals" :key="mealIdx">
-                        <div class="meal-card" style="margin-bottom:14px"
+                        <div class="meal-card"
                           x-data="{ notesOpen: false, notesDraft: '' }"
                           draggable="true"
                           @dragstart="$store.planner.dragType = 'meal'; $store.planner.dragMealIdx = mealIdx; $event.dataTransfer.effectAllowed = 'move'"
@@ -524,28 +527,28 @@
                           <!-- Meal header -->
                           <div class="meal-card-header">
                             <div class="drag-handle" title="Drag to reorder meal">
-                              <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/>
                               </svg>
                             </div>
-                            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0"
+                            <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0"
                               x-text="mealIdx + 1"></div>
                             <input x-model="meal.name" @input="$store.planner.debouncedSave()"
-                              style="font-size:0.9rem;font-weight:600;background:transparent;border:none;flex:1;min-width:0;padding:2px 4px"
+                              style="font-size:0.82rem;font-weight:600;background:transparent;border:none;flex:1;min-width:0;padding:1px 4px"
                               placeholder="Meal name (e.g. Breakfast)" />
                             <!-- Meal totals -->
-                            <div class="meal-totals" style="display:flex;gap:8px;font-size:0.75rem;color:var(--text3);flex-shrink:0;white-space:nowrap">
+                            <div class="meal-totals" style="display:flex;gap:6px;font-size:0.72rem;color:var(--text3);flex-shrink:0;white-space:nowrap">
                               <span><span x-text="$store.planner.mealTotals(mealIdx).calories"></span> kcal</span>
                               <span style="color:var(--accent)"><span x-text="$store.planner.mealTotals(mealIdx).protein"></span>g P</span>
                             </div>
                             <!-- Notes toggle button -->
-                            <button class="btn-icon" :style="meal.notes ? 'color:var(--accent);width:26px;height:26px;flex-shrink:0' : 'color:var(--text3);width:26px;height:26px;flex-shrink:0'" title="Meal notes"
+                            <button class="btn-icon" :style="meal.notes ? 'color:var(--accent);width:20px;height:20px;flex-shrink:0' : 'color:var(--text3);width:20px;height:20px;flex-shrink:0'" title="Meal notes"
                               @click="notesOpen = !notesOpen; if (notesOpen) notesDraft = meal.notes || ''">
-                              <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                              <svg style="width:11px;height:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                             </button>
-                            <button class="btn-icon" style="color:var(--danger);width:26px;height:26px;flex-shrink:0" title="Remove meal"
+                            <button class="btn-icon" style="color:var(--danger);width:20px;height:20px;flex-shrink:0" title="Remove meal"
                               @click="$store.planner.removeMeal(mealIdx)">
-                              <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                              <svg style="width:11px;height:11px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                             </button>
                           </div>
 
@@ -563,7 +566,7 @@
                           </div>
 
                             <!-- Column header for items -->
-                          <div class="meal-item-grid meal-header-row" style="background:var(--surface2);padding-top:6px;padding-bottom:6px">
+                          <div class="meal-item-grid meal-header-row" style="background:var(--surface2);padding-top:3px;padding-bottom:3px">
                             <span></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600" x-text="$store.planner.t('col_food')"></span>
                             <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);font-weight:600;text-align:center" x-text="$store.planner.t('col_qty')"></span>
@@ -635,16 +638,16 @@
                               </div>
 
                               <!-- Scratch + Remove -->
-                              <div style="display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center">
-                                <button class="btn-icon" style="width:24px;height:24px"
+                              <div class="item-actions">
+                                <button class="btn-icon" style="width:18px;height:18px"
                                   :style="item.scratched ? 'color:var(--warning)' : 'color:var(--text3)'"
                                   :title="item.scratched ? $store.planner.t('restore_item_title') : $store.planner.t('scratch_item_title')"
                                   @click="item.scratched = !item.scratched; $store.planner.debouncedSave()">
-                                  <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                  <svg style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <line x1="4" y1="20" x2="20" y2="4"/>
                                   </svg>
                                 </button>
-                                <button class="btn-icon" style="width:24px;height:24px;color:var(--danger)" title="Remove"
+                                <button class="btn-icon" style="width:18px;height:18px;color:var(--danger)" title="Remove"
                                   @click="$store.planner.removeItem(mealIdx, itemIdx)">
                                   <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                                 </button>
@@ -653,7 +656,7 @@
                           </template>
 
                           <!-- Add food to meal -->
-                          <div style="padding:10px 16px;border-top:1px solid var(--border)">
+                          <div style="padding:4px 10px;border-top:1px solid var(--border)">
                             <button class="btn btn-ghost btn-sm" style="color:var(--accent)"
                               @click="meal.items.push({ foodId: '', quantity: 100 }); $store.planner.debouncedSave()">
                               <svg style="width:13px;height:13px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
@@ -662,6 +665,7 @@
                           </div>
                         </div>
                       </template>
+                      </div>
 
                       <!-- Add meal -->
                       <button class="btn btn-secondary" @click="$store.planner.addMeal()">

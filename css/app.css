@@ -276,18 +276,23 @@ input[type="checkbox"] {
 .meal-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0;
   overflow: visible;
-  margin-bottom: 10px;
+  margin-bottom: 0;
+  border-bottom: none;
 }
 .meal-card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
+  gap: 8px;
+  padding: 6px 12px;
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
-  border-radius: var(--radius) var(--radius) 0 0;
+  border-top: 2px solid var(--border);
+  border-radius: 0;
+}
+.meal-card:first-child .meal-card-header {
+  border-top: none;
 }
 .meal-item-row {
   display: grid;
