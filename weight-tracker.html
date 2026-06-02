@@ -155,7 +155,7 @@
       .metrics-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
       .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
       .forms-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
-      @media (max-width: 700px) {
+      @media (max-width: 800px) {
         .compare-grid { grid-template-columns: 1fr; }
         .forms-grid   { grid-template-columns: 1fr; }
         .metric-card  { min-width: 80px; }
@@ -420,90 +420,87 @@
                   </div>
                 </div>
 
-                <!-- ── GAUGE + 7-DAY COMPARISONS ─────────────── -->
-                <div style="display:grid;grid-template-columns:minmax(260px,1fr) 2fr;gap:16px;margin-bottom:18px;align-items:start">
-
-                  <!-- Speedometer Gauge -->
-                  <div class="wt-section" style="padding:16px">
-                    <div class="wt-section-title">
-                      <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                      Goal Progress
-                    </div>
-                    <div style="position:relative">
-                      <div x-html="$store.wt.gaugeSVG" style="width:100%"></div>
-                    </div>
+                <!-- ── GAUGE (always full-width row) ─────────── -->
+                <div class="wt-section" style="padding:16px;margin-bottom:18px">
+                  <div class="wt-section-title">
+                    <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                    Goal Progress
+                  </div>
+                  <!-- Constrain gauge width so it doesn't stretch absurdly wide on large screens -->
+                  <div style="max-width:420px;margin:0 auto">
+                    <div x-html="$store.wt.gaugeSVG" style="width:100%"></div>
                     <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text3);margin-top:4px">
                       <span x-text="$store.wt.startWeight != null ? 'Start: ' + $store.wt.startWeight + $store.wt.unit : ''"></span>
                       <span x-text="$store.wt.targetWeight != null ? 'Goal: ' + $store.wt.targetWeight + $store.wt.unit : ''"></span>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Comparison Cards -->
-                  <div style="display:flex;flex-direction:column;gap:14px">
+                <!-- ── 7-DAY COMPARISONS ───────────────────── -->
+                <div class="compare-grid" style="margin-bottom:18px">
 
-                    <!-- 7-day rolling avg comparison -->
-                    <div class="cmp-card">
-                      <div class="cmp-title">7-Day Rolling Average</div>
-                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                        <div>
-                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">CURRENT 7 DAYS (AVG)</div>
-                          <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.wt.avg7 != null ? $store.wt.avg7.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
-                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.avg7Count + ' entries'"></div>
-                        </div>
-                        <div>
-                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">PREVIOUS 7 DAYS (AVG)</div>
-                          <div style="font-size:1.4rem;font-weight:700;color:var(--text2)" x-text="$store.wt.avgPrev7 != null ? $store.wt.avgPrev7.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
-                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.avgPrev7Count + ' entries'"></div>
-                        </div>
+                  <!-- 7-day rolling avg comparison -->
+                  <div class="cmp-card">
+                    <div class="cmp-title">7-Day Rolling Average</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                      <div>
+                        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">CURRENT 7 DAYS (AVG)</div>
+                        <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.wt.avg7 != null ? $store.wt.avg7.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.avg7Count + ' entries'"></div>
                       </div>
-                      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                        <span style="font-size:0.78rem;color:var(--text3)">Change vs prev. 7 days:</span>
-                        <template x-if="$store.wt.change7 != null">
-                          <span class="cmp-change" :class="$store.wt.change7 < 0 ? 'good' : $store.wt.change7 > 0 ? 'bad' : 'neutral'">
-                            <svg style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                              <path :d="$store.wt.change7 < 0 ? 'M12 5v14M5 18l7 4 7-4' : $store.wt.change7 > 0 ? 'M12 19V5M5 6l7-4 7 4' : 'M5 12h14'"/>
-                            </svg>
-                            <span x-text="($store.wt.change7 > 0 ? '+' : '') + $store.wt.change7.toFixed(2) + ' ' + $store.wt.unit"></span>
-                          </span>
-                        </template>
-                        <template x-if="$store.wt.change7 == null">
-                          <span style="font-size:0.78rem;color:var(--text3)">Not enough data</span>
-                        </template>
+                      <div>
+                        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">PREVIOUS 7 DAYS (AVG)</div>
+                        <div style="font-size:1.4rem;font-weight:700;color:var(--text2)" x-text="$store.wt.avgPrev7 != null ? $store.wt.avgPrev7.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.avgPrev7Count + ' entries'"></div>
                       </div>
                     </div>
-
-                    <!-- Calendar week comparison -->
-                    <div class="cmp-card">
-                      <div class="cmp-title">Weekly Calendar Average (Mon–Sun)</div>
-                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                        <div>
-                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">THIS WEEK (AVG)</div>
-                          <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.wt.avgThisWeek != null ? $store.wt.avgThisWeek.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
-                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.thisWeekCount + ' entries'"></div>
-                        </div>
-                        <div>
-                          <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">LAST WEEK (AVG)</div>
-                          <div style="font-size:1.4rem;font-weight:700;color:var(--text2)" x-text="$store.wt.avgLastWeek != null ? $store.wt.avgLastWeek.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
-                          <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.lastWeekCount + ' entries'"></div>
-                        </div>
-                      </div>
-                      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                        <span style="font-size:0.78rem;color:var(--text3)">Change vs last week:</span>
-                        <template x-if="$store.wt.weekChange != null">
-                          <span class="cmp-change" :class="$store.wt.weekChange < 0 ? 'good' : $store.wt.weekChange > 0 ? 'bad' : 'neutral'">
-                            <svg style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                              <path :d="$store.wt.weekChange < 0 ? 'M12 5v14M5 18l7 4 7-4' : $store.wt.weekChange > 0 ? 'M12 19V5M5 6l7-4 7 4' : 'M5 12h14'"/>
-                            </svg>
-                            <span x-text="($store.wt.weekChange > 0 ? '+' : '') + $store.wt.weekChange.toFixed(2) + ' ' + $store.wt.unit"></span>
-                          </span>
-                        </template>
-                        <template x-if="$store.wt.weekChange == null">
-                          <span style="font-size:0.78rem;color:var(--text3)">Not enough data</span>
-                        </template>
-                      </div>
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                      <span style="font-size:0.78rem;color:var(--text3)">Change vs prev. 7 days:</span>
+                      <template x-if="$store.wt.change7 != null">
+                        <span class="cmp-change" :class="$store.wt.change7 < 0 ? 'good' : $store.wt.change7 > 0 ? 'bad' : 'neutral'">
+                          <svg style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path :d="$store.wt.change7 < 0 ? 'M12 5v14M5 18l7 4 7-4' : $store.wt.change7 > 0 ? 'M12 19V5M5 6l7-4 7 4' : 'M5 12h14'"/>
+                          </svg>
+                          <span x-text="($store.wt.change7 > 0 ? '+' : '') + $store.wt.change7.toFixed(2) + ' ' + $store.wt.unit"></span>
+                        </span>
+                      </template>
+                      <template x-if="$store.wt.change7 == null">
+                        <span style="font-size:0.78rem;color:var(--text3)">Not enough data</span>
+                      </template>
                     </div>
-
                   </div>
+
+                  <!-- Calendar week comparison -->
+                  <div class="cmp-card">
+                    <div class="cmp-title">Weekly Calendar Average (Mon–Sun)</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                      <div>
+                        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">THIS WEEK (AVG)</div>
+                        <div style="font-size:1.4rem;font-weight:700;color:var(--text)" x-text="$store.wt.avgThisWeek != null ? $store.wt.avgThisWeek.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.thisWeekCount + ' entries'"></div>
+                      </div>
+                      <div>
+                        <div style="font-size:0.68rem;color:var(--text3);margin-bottom:4px">LAST WEEK (AVG)</div>
+                        <div style="font-size:1.4rem;font-weight:700;color:var(--text2)" x-text="$store.wt.avgLastWeek != null ? $store.wt.avgLastWeek.toFixed(1) + ' ' + $store.wt.unit : '—'"></div>
+                        <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" x-text="$store.wt.lastWeekCount + ' entries'"></div>
+                      </div>
+                    </div>
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                      <span style="font-size:0.78rem;color:var(--text3)">Change vs last week:</span>
+                      <template x-if="$store.wt.weekChange != null">
+                        <span class="cmp-change" :class="$store.wt.weekChange < 0 ? 'good' : $store.wt.weekChange > 0 ? 'bad' : 'neutral'">
+                          <svg style="width:10px;height:10px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path :d="$store.wt.weekChange < 0 ? 'M12 5v14M5 18l7 4 7-4' : $store.wt.weekChange > 0 ? 'M12 19V5M5 6l7-4 7 4' : 'M5 12h14'"/>
+                          </svg>
+                          <span x-text="($store.wt.weekChange > 0 ? '+' : '') + $store.wt.weekChange.toFixed(2) + ' ' + $store.wt.unit"></span>
+                        </span>
+                      </template>
+                      <template x-if="$store.wt.weekChange == null">
+                        <span style="font-size:0.78rem;color:var(--text3)">Not enough data</span>
+                      </template>
+                    </div>
+                  </div>
+
                 </div>
 
                 <!-- ── LINE CHART ───────────────────────────── -->
@@ -875,14 +872,10 @@
 
         // ── Gauge SVG ────────────────────────────────────────────
         get gaugeSVG() {
-          const W = 300, H = 170;
-          const cx = 150, cy = 148, r = 108, rInner = 72;
+          const W = 300, H = 182;
+          const cx = 150, cy = 148, r = 108;
           const progress = Math.min(Math.max(this.progressPct != null ? this.progressPct / 100 : 0, 0), 1);
 
-          // Angles: 180° = left, 0° = right (standard math coords, SVG y-flipped)
-          // Progress maps 0→180°, 1→0°
-          const startAngle = 180;
-          const endAngle = 0;
           const currentAngle = 180 - progress * 180;
 
           const leftPt  = polarToXY(cx, cy, r, 180);
@@ -899,7 +892,7 @@
             progArc = `M ${leftPt.x} ${leftPt.y} A ${r} ${r} 0 ${large} 1 ${currPt.x} ${currPt.y}`;
           }
 
-          // Zone arcs (danger=0-33%, warn=33-66%, good=66-100%)
+          // Zone arcs (danger=0–33%, warn=33–66%, good=66–100%)
           const z1 = polarToXY(cx, cy, r, 180 - 0.33 * 180);
           const z2 = polarToXY(cx, cy, r, 180 - 0.66 * 180);
 
@@ -908,7 +901,7 @@
           const needlePt = polarToXY(cx, cy, needleLen, currentAngle);
 
           // Color based on progress
-          const color = progress >= 1 ? "#22c55e" : progress >= 0.6 ? "#22c55e" : progress >= 0.3 ? "#f59e0b" : "#ef4444";
+          const color = progress >= 0.6 ? "#22c55e" : progress >= 0.3 ? "#f59e0b" : "#ef4444";
 
           // Tick marks
           let ticks = "";
@@ -919,16 +912,22 @@
             ticks += `<line x1="${pt1.x.toFixed(1)}" y1="${pt1.y.toFixed(1)}" x2="${pt2.x.toFixed(1)}" y2="${pt2.y.toFixed(1)}" stroke="var(--border)" stroke-width="${t % 5 === 0 ? 2 : 1}"/>`;
           }
 
-          // Percentage labels on arc
+          // Percentage labels: 25, 50, 75 on arc; 0% and 100% anchored outside endpoints
           let pctLabels = "";
-          [0, 25, 50, 75, 100].forEach(pct => {
+          [25, 50, 75].forEach(pct => {
             const angle = 180 - pct * 1.8;
             const pt = polarToXY(cx, cy, r + 22, angle);
             pctLabels += `<text x="${pt.x.toFixed(1)}" y="${pt.y.toFixed(1)}" font-size="9" fill="var(--text3)" text-anchor="middle" dominant-baseline="middle">${pct}%</text>`;
           });
+          // 0% — right-anchored, sits to the left of the arc's left endpoint
+          const lbl0 = polarToXY(cx, cy, r + 18, 180);
+          pctLabels += `<text x="${lbl0.x.toFixed(1)}" y="${(lbl0.y - 6).toFixed(1)}" font-size="9" fill="var(--text3)" text-anchor="end" dominant-baseline="middle">0%</text>`;
+          // 100% — left-anchored, sits to the right of the arc's right endpoint
+          const lbl100 = polarToXY(cx, cy, r + 18, 0);
+          pctLabels += `<text x="${lbl100.x.toFixed(1)}" y="${(lbl100.y - 6).toFixed(1)}" font-size="9" fill="var(--text3)" text-anchor="start" dominant-baseline="middle">100%</text>`;
 
           const displayPct = this.progressPct != null ? Math.min(Math.max(this.progressPct, 0), 100).toFixed(1) : "—";
-          const displayLbl = this.progressPct == null ? "Set target" : this.progressPct >= 100 ? "Goal reached!" : "Progress";
+          const displayLbl = this.progressPct == null ? "SET TARGET" : this.progressPct >= 100 ? "GOAL REACHED" : "PROGRESS";
 
           return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto">
             <!-- Zone background arcs -->
@@ -941,17 +940,18 @@
             ${progress > 0.001 ? `<path d="${progArc}" fill="none" stroke="${color}" stroke-width="14" stroke-linecap="round"/>` : ""}
             <!-- Ticks -->
             ${ticks}
+            <!-- Arc % labels (25 / 50 / 75 only) -->
             ${pctLabels}
             <!-- Needle -->
             <line x1="${cx}" y1="${cy}" x2="${needlePt.x.toFixed(1)}" y2="${needlePt.y.toFixed(1)}" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
             <circle cx="${cx}" cy="${cy}" r="8" fill="var(--surface3)" stroke="${color}" stroke-width="2.5"/>
             <circle cx="${cx}" cy="${cy}" r="3" fill="${color}"/>
-            <!-- Center text -->
-            <text x="${cx}" y="${cy - 28}" font-size="26" font-weight="700" fill="${color}" text-anchor="middle" dominant-baseline="middle">${displayPct}${this.progressPct != null ? '%' : ''}</text>
-            <text x="${cx}" y="${cy - 8}" font-size="10" fill="var(--text3)" text-anchor="middle">${displayLbl}</text>
-            <!-- Start / End labels -->
-            <text x="${leftPt.x - 6}" y="${leftPt.y + 16}" font-size="9" fill="var(--text3)" text-anchor="middle">Start</text>
-            <text x="${rightPt.x + 6}" y="${rightPt.y + 16}" font-size="9" fill="var(--accent)" text-anchor="middle">Goal</text>
+            <!-- Center text: label ABOVE the big number -->
+            <text x="${cx}" y="${cy - 55}" font-size="8" fill="var(--text3)" text-anchor="middle" dominant-baseline="middle" letter-spacing="1">${displayLbl}</text>
+            <text x="${cx}" y="${cy - 32}" font-size="28" font-weight="700" fill="${color}" text-anchor="middle" dominant-baseline="middle">${displayPct}${this.progressPct != null ? '%' : ''}</text>
+            <!-- Start / End labels (below baseline, clear of arc endpoints) -->
+            <text x="${(leftPt.x).toFixed(1)}" y="${(cy + 20).toFixed(1)}" font-size="9" fill="var(--text3)" text-anchor="middle">Start</text>
+            <text x="${(rightPt.x).toFixed(1)}" y="${(cy + 20).toFixed(1)}" font-size="9" fill="var(--accent)" text-anchor="middle">Goal</text>
           </svg>`;
         },
 
