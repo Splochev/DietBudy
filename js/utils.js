@@ -1,18 +1,7 @@
 // js/utils.js — Shared utility helpers for DietBuddy
 
-/** Generate a simple unique ID */
-export function generateId() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-/** Debounce a function */
-export function debounce(fn, ms = 300) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
-  };
-}
+// ─── ID GENERATION & DEBOUNCE (shared) ────────────────────────
+export { generateId, debounce } from 'https://splochev.github.io/personalBudy/js/shared-utils.js';
 
 /** Round a number to N decimal places */
 export function round(n, decimals = 1) {

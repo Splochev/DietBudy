@@ -355,16 +355,13 @@ input[type="checkbox"] {
 
 /* ── AUTOCOMPLETE ────────────────────────────────────────────── */
 .ac-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  position: fixed;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   max-height: 220px;
   overflow-y: auto;
-  z-index: 200;
+  z-index: 1000;
   box-shadow: var(--shadow);
 }
 .ac-item {

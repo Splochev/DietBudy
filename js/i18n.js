@@ -50,7 +50,7 @@ export const translations = {
     col_weight_unit: "grams",
     col_per_100g: "/100g",
     col_price: "Price",
-    col_price_100g: "₽/100g",
+    col_price_100g: "€/100g",
     add_food_title: "Add Food",
     edit_food_title: "Edit Food",
     label_food_name: "Food Name *",

@@ -175,19 +175,22 @@
             </div>
 
             <nav class="topbar-nav" style="display:flex;gap:4px;margin-left:8px">
-              <a href="./food-manager.html"
+              <a href="https://splochev.github.io/personalBudy/"
                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)"
                 onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'"
                 onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
-                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="6" y1="2" x2="6" y2="9"/>
-                  <line x1="9" y1="2" x2="9" y2="9"/>
-                  <path d="M6 9 Q7.5 12 9 9"/>
-                  <line x1="7.5" y1="12" x2="7.5" y2="22"/>
-                  <ellipse cx="16.5" cy="6" rx="2.5" ry="4"/>
-                  <line x1="16.5" y1="10" x2="16.5" y2="22"/>
+                <svg style="width:14px;height:14px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home / Начало
+              </a>
+              <!-- Budget (cross-app) -->
+              <a href="https://splochev.github.io/budgetBuddy/budget.html"
+                style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)"
+                onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'"
+                onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
+                <svg style="width:14px;height:14px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/>
                 </svg>
-                <span x-text="$store.planner.t('nav_foods')"></span>
+                <span x-text="$store.planner.lang === 'bg' ? 'Бюджет' : 'Budget'"></span>
               </a>
               <a href="./planner.html"
                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--accent);background:var(--accent-bg);text-decoration:none">
@@ -199,13 +202,6 @@
                   <line x1="8" y1="14" x2="16" y2="14"/>
                 </svg>
                 <span x-text="$store.planner.t('nav_planner')"></span>
-              </a>
-              <a href="./weight-tracker.html"
-                style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)"
-                onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'"
-                onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
-                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>
-                Weight
               </a>
               <a href="https://splochev.github.io/GymBudy/workout.html"
                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)"
@@ -220,15 +216,19 @@
                 </svg>
                 <span x-text="$store.planner.t('nav_workouts')"></span>
               </a>
-              <!-- Budget (cross-app) -->
-              <a href="https://splochev.github.io/budgetBuddy/budget.html"
+              <a href="./food-manager.html"
                 style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:4px;font-size:0.8rem;font-weight:500;color:var(--text3);text-decoration:none;transition:var(--trans)"
                 onmouseover="this.style.color='var(--text)';this.style.background='var(--surface2)'"
                 onmouseout="this.style.color='var(--text3)';this.style.background='transparent'">
-                <svg style="width:14px;height:14px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="6" y1="2" x2="6" y2="9"/>
+                  <line x1="9" y1="2" x2="9" y2="9"/>
+                  <path d="M6 9 Q7.5 12 9 9"/>
+                  <line x1="7.5" y1="12" x2="7.5" y2="22"/>
+                  <ellipse cx="16.5" cy="6" rx="2.5" ry="4"/>
+                  <line x1="16.5" y1="10" x2="16.5" y2="22"/>
                 </svg>
-                <span x-text="$store.planner.lang === 'bg' ? 'Бюджет' : 'Budget'"></span>
+                <span x-text="$store.planner.t('nav_foods')"></span>
               </a>
             </nav>
 
@@ -278,25 +278,25 @@
                   </button>
                 </div>
                 <div style="display:flex;flex-direction:column;padding:8px;border-bottom:1px solid var(--border);gap:2px">
-                  <a href="./food-manager.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
-                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
-                    <span x-text="$store.planner.t('nav_foods')"></span>
+                  <a href="https://splochev.github.io/personalBudy/" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Home / Начало
+                  </a>
+                  <a href="https://splochev.github.io/budgetBuddy/budget.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
+                    <span x-text="$store.planner.lang === 'bg' ? 'Бюджет' : 'Budget'"></span>
                   </a>
                   <a href="./planner.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);font-size:0.875rem;font-weight:600;text-decoration:none">
                     <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
                     <span x-text="$store.planner.t('nav_planner')"></span>
                   </a>
-                  <a href="./weight-tracker.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
-                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-6"/></svg>
-                    Weight Tracker
-                  </a>
                   <a href="https://splochev.github.io/GymBudy/workout.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
                     <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                     <span x-text="$store.planner.t('nav_workouts')"></span>
                   </a>
-                  <a href="https://splochev.github.io/budgetBuddy/budget.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
-                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/></svg>
-                    <span x-text="$store.planner.lang === 'bg' ? 'Бюджет' : 'Budget'"></span>
+                  <a href="./food-manager.html" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--radius);color:var(--text3);font-size:0.875rem;font-weight:500;text-decoration:none">
+                    <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="2" x2="6" y2="9"/><line x1="9" y1="2" x2="9" y2="9"/><path d="M6 9 Q7.5 12 9 9"/><line x1="7.5" y1="12" x2="7.5" y2="22"/><ellipse cx="16.5" cy="6" rx="2.5" ry="4"/><line x1="16.5" y1="10" x2="16.5" y2="22"/></svg>
+                    <span x-text="$store.planner.t('nav_foods')"></span>
                   </a>
                 </div>
               </div>
@@ -614,16 +614,16 @@
                                 </svg>
                               </span>
                               <!-- Food name (autocomplete) -->
-                              <div style="position:relative" x-data="{ open: false, q: $store.planner.foodName(item.foodId) }">
+                              <div style="position:relative" x-data="{ open: false, q: $store.planner.foodName(item.foodId), ddStyle: '', pos(el) { const r = el.getBoundingClientRect(); this.ddStyle = 'top:' + r.bottom + 'px;left:' + r.left + 'px;width:' + r.width + 'px'; } }">
                                 <input :value="q"
                                   :class="item.scratched ? 'item-food-name' : ''"
-                                  @input="q = $event.target.value; open = true"
-                                  @focus="open = true"
+                                  @input="q = $event.target.value; open = true; pos($el)"
+                                  @focus="open = true; pos($el)"
                                   @blur="setTimeout(() => { open = false; if (!$store.planner.foodById(item.foodId)) q = '' }, 200)"
                                   @keydown.escape="open = false"
                                   placeholder="Search food…"
                                   style="width:100%;padding:4px 8px;font-size:0.8rem" />
-                                <div x-show="open && q.length > 0" class="ac-dropdown">
+                                <div x-show="open && q.length > 0" class="ac-dropdown" :style="ddStyle">
                                   <template x-for="food in $store.planner.searchFoods(q)" :key="food.id">
                                     <div class="ac-item" @mousedown.prevent="item.foodId = food.id; q = food.name; open = false; $store.planner.debouncedSave()">
                                       <span x-text="food.name"></span>
@@ -679,11 +679,17 @@
                       </template>
                       </div>
 
-                      <!-- Add meal -->
-                      <button class="btn btn-secondary" @click="$store.planner.addMeal()">
-                        <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                        <span x-text="$store.planner.t('btn_add_meal')"></span>
-                      </button>
+                      <!-- Add meal + Add Food to DB -->
+                      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                        <button class="btn btn-secondary" @click="$store.planner.addMeal()">
+                          <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                          <span x-text="$store.planner.t('btn_add_meal')"></span>
+                        </button>
+                        <button class="btn btn-ghost" style="font-size:0.8rem;color:var(--text3)" @click="$store.planner.quickAddOpen = true">
+                          <svg style="width:12px;height:12px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+                          <span>Add Food to DB</span>
+                        </button>
+                      </div>
                     </div>
                   </template>
 
@@ -798,6 +804,50 @@
             </template>
           </div>
 
+          <!-- Quick Add Food Modal -->
+          <div x-show="$store.planner.quickAddOpen" style="position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);padding:16px" @click.self="$store.planner.quickAddOpen = false">
+            <div style="background:var(--surface);border-radius:var(--radius);padding:24px;width:100%;max-width:400px;border:1px solid var(--border);box-shadow:var(--shadow)">
+              <h3 style="margin:0 0 16px;font-size:1rem;font-weight:700">Add Food to Database</h3>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div>
+                  <label class="form-label">Name *</label>
+                  <input x-model="$store.planner.quickFood.name" placeholder="e.g. Chicken breast" style="width:100%">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <div>
+                    <label class="form-label">Calories / 100g</label>
+                    <input type="number" x-model.number="$store.planner.quickFood.calories" placeholder="165" min="0" style="width:100%">
+                  </div>
+                  <div>
+                    <label class="form-label">Protein / 100g *</label>
+                    <input type="number" x-model.number="$store.planner.quickFood.protein" placeholder="31" min="0" step="0.1" style="width:100%">
+                  </div>
+                  <div>
+                    <label class="form-label">Fat / 100g</label>
+                    <input type="number" x-model.number="$store.planner.quickFood.fat" placeholder="3.6" min="0" step="0.1" style="width:100%">
+                  </div>
+                  <div>
+                    <label class="form-label">Carbs / 100g</label>
+                    <input type="number" x-model.number="$store.planner.quickFood.carbs" placeholder="0" min="0" step="0.1" style="width:100%">
+                  </div>
+                  <div>
+                    <label class="form-label">Price (€)</label>
+                    <input type="number" x-model.number="$store.planner.quickFood.price" placeholder="2.50" min="0" step="0.01" style="width:100%">
+                  </div>
+                  <div>
+                    <label class="form-label">Package (g)</label>
+                    <input type="number" x-model.number="$store.planner.quickFood.packageWeight" placeholder="500" min="0" style="width:100%">
+                  </div>
+                </div>
+                <div x-show="$store.planner.quickFoodError" style="color:var(--danger);font-size:0.82rem" x-text="$store.planner.quickFoodError"></div>
+              </div>
+              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+                <button class="btn btn-secondary" @click="$store.planner.quickAddOpen = false; $store.planner.quickFoodError = ''">Cancel</button>
+                <button class="btn btn-primary" @click="$store.planner.saveQuickFood()">Save Food</button>
+              </div>
+            </div>
+          </div>
+
         </div><!-- /app shell -->
       </template>
     </div><!-- /root -->
@@ -852,6 +902,11 @@
       }
 
       Alpine.store("planner", {
+        // ── Quick Add Food ────────────────────────────────────
+        quickAddOpen: false,
+        quickFoodError: '',
+        quickFood: { name: '', calories: 0, protein: 0, fat: 0, carbs: 0, price: null, packageWeight: null },
+
         // ── Auth ──────────────────────────────────────────────
         authState: "loading",
         user: null,
@@ -949,11 +1004,16 @@
         },
 
         async logout() {
-          await signOut(auth);
-          this.foods = [];
-          this.mealPlans = [];
-          this.activePlan = null;
-          this.activePlanId = null;
+          try {
+            await signOut(auth);
+            this.foods = [];
+            this.mealPlans = [];
+            this.activePlan = null;
+            this.activePlanId = null;
+          } catch (e) {
+            console.error('Logout failed:', e);
+            this.toast('Logout failed. Please try again.', 'error');
+          }
         },
 
         // ── Food helpers ──────────────────────────────────────
@@ -1305,6 +1365,39 @@
           const id = Math.random().toString(36).slice(2);
           this.toasts = [...this.toasts, { id, msg, type, undoable }];
           setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, undoable ? 8000 : 3000);
+        },
+
+        // ── Quick Add Food ────────────────────────────────────
+        async saveQuickFood() {
+          if (!this.quickFood.name.trim()) {
+            this.quickFoodError = 'Name is required.';
+            return;
+          }
+          if (!this.quickFood.protein && this.quickFood.protein !== 0) {
+            this.quickFoodError = 'Protein is required.';
+            return;
+          }
+          try {
+            const food = {
+              name: this.quickFood.name.trim(),
+              calories: this.quickFood.calories || 0,
+              protein: this.quickFood.protein || 0,
+              fats: this.quickFood.fat || 0,
+              carbs: this.quickFood.carbs || 0,
+            };
+            if (this.quickFood.price != null && this.quickFood.price !== '') food.price = this.quickFood.price;
+            if (this.quickFood.packageWeight) food.packageWeight = this.quickFood.packageWeight;
+            await DB.addFood(this.user.uid, food);
+            // Refresh foods list
+            this.foods = await DB.getFoods(this.user.uid);
+            this.quickAddOpen = false;
+            this.quickFood = { name: '', calories: 0, protein: 0, fat: 0, carbs: 0, price: null, packageWeight: null };
+            this.quickFoodError = '';
+            this.toast('Food added!', 'success');
+          } catch (e) {
+            this.quickFoodError = 'Failed to save: ' + e.message;
+            console.error(e);
+          }
         },
       });
 

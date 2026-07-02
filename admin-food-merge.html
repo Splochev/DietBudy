@@ -270,6 +270,10 @@
         async init() {
           onAuthStateChanged(auth, async (user) => {
             if (user) {
+              if (user.email !== 'stanislav.plochev@codery.bg') {
+                document.body.innerHTML = '<p style="padding:2rem;font-family:sans-serif">Access denied.</p>';
+                return;
+              }
               this.user = user;
               this.authState = "authenticated";
               // Save email to user doc so admin can display it
