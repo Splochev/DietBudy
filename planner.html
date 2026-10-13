@@ -509,6 +509,10 @@
                             </template>
                           </span>
                         </div>
+                        <div class="stat-chip" x-show="$store.planner.dailyTotals.grams > 0">
+                          <span class="stat-val" x-text="$store.planner.dailyTotals.grams + 'g'"></span>
+                          <span class="stat-label" x-text="$store.planner.t('food_day')"></span>
+                        </div>
                         <div class="stat-chip" x-show="$store.planner.dailyTotals.cost > 0">
                           <span class="stat-val" x-text="$store.planner.dailyTotals.cost.toFixed(2) + ' €'"></span>
                           <span class="stat-label" x-text="$store.planner.t('cost_day')"></span>
@@ -1163,9 +1167,11 @@
         },
 
         get dailyTotals() {
-          if (!this.activePlan?.meals) return { calories: 0, protein: 0, fats: 0, carbs: 0, cost: 0 };
-          const all = this.activePlan.meals.flatMap(m => m.items.filter(i => !i.scratched));
-          return sumItems(all, this.foodMap);
+          if (!this.activePlan?.meals) return { calories: 0, protein: 0, fats: 0, carbs: 0, cost: 0, grams: 0 };
+          const all = this.activePlan.meals.flatMap(m => m.items.filter(i => !i.scratched && this.foodMap[i.foodId]));
+          const totals = sumItems(all, this.foodMap);
+          totals.grams = round(all.reduce((s, i) => s + (Number(i.quantity) || 0), 0), 0);
+          return totals;
         },
 
         get calorieClass() {
