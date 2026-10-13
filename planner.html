@@ -1156,7 +1156,10 @@
         mealTotals(mealIdx) {
           const meal = this.activePlan?.meals?.[mealIdx];
           if (!meal) return { calories: 0, protein: 0, fats: 0, carbs: 0, cost: 0, grams: 0 };
-          return sumItems(meal.items.filter(i => !i.scratched), this.foodMap);
+          const items = meal.items.filter(i => !i.scratched && this.foodMap[i.foodId]);
+          const totals = sumItems(items, this.foodMap);
+          totals.grams = round(items.reduce((s, i) => s + (Number(i.quantity) || 0), 0), 0);
+          return totals;
         },
 
         get dailyTotals() {
