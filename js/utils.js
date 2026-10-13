@@ -42,11 +42,12 @@ export function calcItem(food, quantity) {
  * Sum nutrition totals across an array of { food, quantity } items.
  */
 export function sumItems(items, foodMap) {
-  const totals = { calories: 0, protein: 0, fats: 0, carbs: 0, cost: 0, costKnown: true };
+  const totals = { calories: 0, protein: 0, fats: 0, carbs: 0, cost: 0, grams: 0, costKnown: true };
   for (const item of items) {
     const food = foodMap[item.foodId];
     if (!food) continue;
     const c = calcItem(food, item.quantity);
+    totals.grams    += Number(item.quantity) || 0;
     totals.calories += c.calories;
     totals.protein  += c.protein;
     totals.fats     += c.fats;
@@ -59,6 +60,7 @@ export function sumItems(items, foodMap) {
   totals.fats     = round(totals.fats,     1);
   totals.carbs    = round(totals.carbs,    1);
   totals.cost     = round(totals.cost,     2);
+  totals.grams    = round(totals.grams,    0);
   return totals;
 }
 
